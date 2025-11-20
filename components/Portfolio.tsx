@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { ExternalLink, Server, Cpu, BarChart3, Layout, Users, CheckCircle2, ArrowRight, Globe } from 'lucide-react';
+import { ExternalLink, Server, Cpu, BarChart3, Layout, Users, CheckCircle2, ArrowRight, Globe, Layers, Zap, Database, ChevronLeft, ChevronRight, RotateCw } from 'lucide-react';
 
 interface Project {
   id: string;
@@ -13,6 +14,7 @@ interface Project {
   techStack: string[];
   impact: string[];
   color: string;
+  imageUrl: string;
 }
 
 export const Portfolio: React.FC = () => {
@@ -21,150 +23,251 @@ export const Portfolio: React.FC = () => {
       id: 'bullet',
       name: 'Solar Operations Platform',
       company: 'Bullet Energy',
-      role: 'Lead Developer & Solar Operations Architect',
+      role: 'Lead Developer & Solar Ops Architect',
       url: 'https://bulletenergy.pro',
       timeline: '2024-2025',
-      description: 'A complete solar sales proposal system with automated ROI calculation, CRM, and project pipeline tracking. Designed to streamline the residential solar installation process from lead to contract.',
-      techStack: ['AI Automation', 'Real-time Data', 'CRM Workflows', 'Financial Modeling'],
+      description: 'A unified proposal automation engine that resolved fragmented sales workflows. By integrating real-time financial modeling with CRM data, I reduced lead-to-contract time from hours to minutes.',
+      techStack: ['React', 'Node.js', 'Salesforce API', 'Automated PDFs'],
       impact: [
-        'Reduced proposal generation time from 2 hours to 15 mins',
-        'Enabled sales team to handle 3x more leads',
-        'Improved customer satisfaction through transparency'
+        'Reduced proposal time: 2 hours → 15 mins',
+        'Tripled lead handling capacity per rep',
+        'Eliminated pricing errors via auto-calc'
       ],
-      color: 'from-orange-500 to-red-600'
+      color: 'from-orange-500 to-red-600',
+      // Using a dashboard-style placeholder.
+      imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2670&auto=format&fit=crop' 
     },
     {
-      id: 'sunpeach',
-      name: 'Sales & Operations System',
-      company: 'Sunpeach Solar',
-      role: 'Technical Lead & Operations Specialist',
-      url: 'https://sps.ainx.pro',
+      id: 'traylor',
+      name: 'AI Commercial Real Estate Platform',
+      company: 'TraylorCRE',
+      role: 'Lead Full-Stack Engineer',
+      url: 'https://traylorcre.com',
       timeline: '2024-2025',
-      description: 'Advanced CRM with AI-powered lead qualification, system design calculation tools, and automated installation scheduling. Serves as the central nervous system for daily operations.',
-      techStack: ['Full-stack Web App', 'Automated Workflows', 'API Integrations', 'System Design'],
+      description: 'A next-generation commercial real estate platform leveraging AI to analyze market trends and streamline deal flow. Built to aggregate complex property data into actionable insights for investors and brokers.',
+      techStack: ['Next.js', 'TypeScript', 'Google Cloud AI', 'PostgreSQL'],
       impact: [
-        'Reduced customer acquisition costs by 40%',
-        'Improved installation scheduling efficiency',
-        'Enhanced customer communication with 24/7 automation'
+        'Automated property valuation models',
+        'Reduced due diligence time by 60%',
+        'Integrated real-time market data feeds'
       ],
-      color: 'from-yellow-500 to-orange-500'
+      color: 'from-indigo-500 to-purple-600',
+      // Replaced broken temporary link with a permanent reliable image representing CRE/Architecture
+      imageUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2670&auto=format&fit=crop'
     },
     {
       id: 'freedom',
-      name: 'Solar Sales Pro Dashboard',
-      company: 'Freedom Solar / Solar Sales Pro',
-      role: 'Solar Sales Automation Architect',
-      url: 'https://solarsales.pro',
+      name: 'Solar Sales Pro - Branding Engine',
+      company: 'Solar Sales Pro',
+      role: 'Automation Architect',
+      url: 'https://go.solarsales.pro/michaeltran',
       dashboardUrl: 'https://solarsales.pro/projectdashboard',
       timeline: '2024-2025',
-      description: 'A comprehensive operational dashboard for tracking solar sales performance, project statuses, and team metrics. Provides real-time visibility into the health of the solar pipeline.',
-      techStack: ['Dashboard Analytics', 'Real-time Monitoring', 'Team Management', 'Performance Tracking'],
+      description: 'A dual-threat ecosystem: AI-powered personal branding funnels for reps coupled with a backend command center. This platform automates authority building, allowing solar pros to generate 381% more leads and create proposals in under 15 seconds.',
+      techStack: ['React', 'Firebase', 'AI Branding', 'Funnel Ops'],
       impact: [
-        'Centralized project tracking for distributed teams',
-        'Real-time visualization of sales pipeline health',
-        'Data-driven decision making for sales leadership'
+        '381% increase in organic lead generation',
+        'Instant 15-second AI proposal creation',
+        'Automated personal brand deployment'
       ],
-      color: 'from-blue-600 to-indigo-600'
+      color: 'from-blue-600 to-cyan-500',
+       // Success/Growth image matching the "Transform Your Sales" theme
+      imageUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=2664&auto=format&fit=crop'
+    },
+    {
+      id: 'sunpeach',
+      name: 'Sales & Ops CRM System',
+      company: 'Sunpeach Solar',
+      role: 'Technical Lead',
+      url: 'https://sps.ainx.pro',
+      timeline: '2024-2025',
+      description: 'A custom AI-powered CRM designed to handle the specific nuances of solar lead lifecycles. It automated customer communication and scheduling, significantly lowering acquisition costs.',
+      techStack: ['Next.js', 'PostgreSQL', 'Twilio API', 'AI Agents'],
+      impact: [
+        'Cut Customer Acquisition Cost (CAC) by 40%',
+        'Automated 80% of initial customer follow-ups',
+        'Zero downtime during migration'
+      ],
+      color: 'from-yellow-500 to-orange-500',
+       // Using a CRM/Interface style placeholder.
+      imageUrl: 'https://images.unsplash.com/photo-1661956602116-aa6865609028?q=80&w=2564&auto=format&fit=crop'
     }
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-12">
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-2xl shadow-lg text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-electric-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-2">
-            <span className="px-3 py-1 bg-white/10 text-white text-xs font-bold rounded-full uppercase tracking-wider border border-white/20">
-              Proven Experience
+      <div className="bg-slate-900 p-10 rounded-3xl shadow-2xl text-white relative overflow-hidden border border-slate-800">
+        {/* Background Elements */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-electric-500/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-solar-500/10 rounded-full blur-3xl -ml-10 -mb-10"></div>
+        
+        <div className="relative z-10 max-w-3xl">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm border border-white/10">
+              <Layers className="w-5 h-5 text-electric-400" />
+            </div>
+            <span className="text-electric-400 text-sm font-bold uppercase tracking-wider">
+              Engineering Portfolio
             </span>
           </div>
-          <h1 className="text-3xl font-bold mb-2">Solar Project Portfolio</h1>
-          <p className="text-slate-300 max-w-3xl">
-            Before seeking investment, I have already worked with <strong className="text-white">THREE major solar companies</strong>, 
-            building operational systems that demonstrate real capability in the solar industry.
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+            Building the Digital Infrastructure of <span className="text-transparent bg-clip-text bg-gradient-to-r from-solar-400 to-electric-400">Solar Energy</span>
+          </h1>
+          <p className="text-slate-300 text-lg leading-relaxed mb-8">
+            Before seeking investment, I architected and deployed mission-critical systems for three major solar companies. These aren't just concepts—they are live platforms processing millions in revenue.
           </p>
+          <div className="flex flex-wrap gap-4">
+            <div className="bg-slate-800/50 px-4 py-2 rounded-full border border-slate-700 flex items-center gap-2">
+              <Database className="w-4 h-4 text-green-400" />
+              <span className="text-sm font-medium">Full-Stack Architecture</span>
+            </div>
+            <div className="bg-slate-800/50 px-4 py-2 rounded-full border border-slate-700 flex items-center gap-2">
+              <Zap className="w-4 h-4 text-yellow-400" />
+              <span className="text-sm font-medium">Automation & AI</span>
+            </div>
+            <div className="bg-slate-800/50 px-4 py-2 rounded-full border border-slate-700 flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-blue-400" />
+              <span className="text-sm font-medium">Operational Analytics</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Projects Grid */}
-      <div className="grid grid-cols-1 gap-8">
-        {projects.map((project) => (
-          <div key={project.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col lg:flex-row">
+      {/* Projects List */}
+      <div className="space-y-32">
+        {projects.map((project, index) => (
+          <div key={project.id} className={`flex flex-col lg:flex-row gap-12 items-center ${index % 2 === 1 ? 'lg:flex-row-reverse' : ''}`}>
             
-            {/* Visual Side (Left) */}
-            <div className={`lg:w-1/3 bg-gradient-to-br ${project.color} p-8 text-white flex flex-col justify-between`}>
-              <div>
-                <div className="flex items-center gap-2 opacity-90 mb-1">
-                  <Server className="w-4 h-4" />
-                  <span className="text-sm font-semibold">{project.company}</span>
+            {/* Screenshot / Visual Side */}
+            <div className="w-full lg:w-7/12 relative group perspective-1000">
+              {/* Glow Effect */}
+              <div className={`absolute -inset-4 bg-gradient-to-r ${project.color} opacity-20 blur-xl rounded-[2rem] group-hover:opacity-30 transition duration-500`}></div>
+              
+              {/* Browser Window Frame */}
+              <div className="relative bg-slate-900 rounded-xl shadow-2xl border border-slate-700 overflow-hidden transform transition duration-500 group-hover:-translate-y-2 group-hover:rotate-x-2 group-hover:shadow-electric-500/20">
+                {/* Browser Header */}
+                <div className="bg-slate-800 px-4 py-3 flex items-center gap-4 border-b border-slate-700">
+                  <div className="flex gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
+                    <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                    <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
+                  </div>
+                  <div className="flex gap-3 text-slate-500">
+                     <ChevronLeft className="w-4 h-4 opacity-50" />
+                     <ChevronRight className="w-4 h-4 opacity-50" />
+                     <RotateCw className="w-3 h-3 opacity-50 mt-0.5" />
+                  </div>
+                  <div className="flex-1 bg-slate-900/50 px-3 py-1.5 rounded-md text-xs text-slate-400 font-mono text-center truncate border border-slate-700/50 flex items-center justify-center gap-2">
+                    <Globe className="w-3 h-3 opacity-50" />
+                    {project.url.replace('https://', '')}
+                  </div>
                 </div>
-                <h2 className="text-2xl font-bold mb-2">{project.name}</h2>
-                <p className="text-white/80 text-sm">{project.role}</p>
-                <div className="mt-2 inline-block bg-white/20 px-2 py-1 rounded text-xs font-mono">
-                  {project.timeline}
+
+                {/* Image Container */}
+                <div className="relative aspect-[16/10] overflow-hidden bg-slate-900 group">
+                   <img 
+                    src={project.imageUrl} 
+                    alt={`${project.name} Screenshot`}
+                    className="w-full h-full object-cover opacity-90 group-hover:opacity-40 group-hover:scale-105 transition duration-700 ease-out"
+                   />
+                   
+                   {/* Hover Overlay */}
+                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 z-10">
+                      <a 
+                        href={project.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="bg-white/10 backdrop-blur-md border border-white/20 text-white px-6 py-3 rounded-full font-bold flex items-center gap-2 hover:bg-white/20 hover:scale-105 transition transform shadow-xl"
+                      >
+                        Visit Live Site <ExternalLink className="w-4 h-4" />
+                      </a>
+                   </div>
+
+                   {/* Gradient Overlay (always visible slightly) */}
+                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent pointer-events-none"></div>
+                   
+                   {/* Bottom Label */}
+                   <div className="absolute bottom-4 left-4 right-4 text-center pointer-events-none">
+                      <p className="text-slate-400 text-xs font-mono opacity-0 group-hover:opacity-100 transition delay-100">
+                        Click to navigate to {project.company}
+                      </p>
+                   </div>
                 </div>
-              </div>
-
-              <div className="mt-8">
-                 <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm border border-white/10">
-                    <Layout className="w-8 h-8 mb-3 text-white/90" />
-                    <div className="h-2 w-2/3 bg-white/30 rounded mb-2"></div>
-                    <div className="h-2 w-1/2 bg-white/30 rounded"></div>
-                 </div>
-              </div>
-
-              <div className="mt-6 pt-6 border-t border-white/20">
-                 <div className="flex flex-wrap gap-2">
-                   {project.techStack.map((tech, i) => (
-                     <span key={i} className="text-[10px] uppercase font-bold bg-black/20 px-2 py-1 rounded text-white/90">
-                       {tech}
-                     </span>
-                   ))}
-                 </div>
               </div>
             </div>
 
-            {/* Content Side (Right) */}
-            <div className="lg:w-2/3 p-8">
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Project Overview</h3>
-              <p className="text-slate-600 mb-6 leading-relaxed">
+            {/* Content Side */}
+            <div className="w-full lg:w-5/12 space-y-8">
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                   <div className={`p-2 rounded-lg bg-gradient-to-r ${project.color} shadow-lg`}>
+                      <Layout className="w-5 h-5 text-white" />
+                   </div>
+                   <span className="font-bold text-slate-500 text-sm uppercase tracking-wide">{project.company}</span>
+                </div>
+                <h2 className="text-4xl font-bold text-slate-900 mb-4">{project.name}</h2>
+                <div className="flex flex-wrap gap-3">
+                  <span className="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-bold border border-slate-200">
+                    {project.role}
+                  </span>
+                  <span className="bg-slate-100 text-slate-500 px-3 py-1 rounded-full text-xs font-medium border border-slate-200">
+                    {project.timeline}
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-slate-600 leading-relaxed text-lg border-l-4 border-slate-200 pl-4">
                 {project.description}
               </p>
 
-              <h4 className="font-bold text-slate-800 mb-3 flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-electric-600" /> Business Impact
-              </h4>
-              <ul className="space-y-3 mb-8">
-                {project.impact.map((item, i) => (
-                  <li key={i} className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0 mt-0.5" />
-                    <span className="text-slate-600 text-sm">{item}</span>
-                  </li>
-                ))}
-              </ul>
+              <div>
+                <h4 className="font-bold text-slate-900 mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
+                  <CheckCircle2 className="w-4 h-4 text-green-500" /> Key Impact
+                </h4>
+                <ul className="space-y-3">
+                  {project.impact.map((item, i) => (
+                    <li key={i} className="flex items-start gap-3 text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100 hover:border-electric-200 transition">
+                      <span className={`w-2 h-2 rounded-full mt-2 shrink-0 bg-gradient-to-r ${project.color}`}></span>
+                      <span className="text-sm font-medium">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-              <div className="flex flex-wrap gap-4">
+              <div>
+                 <h4 className="font-bold text-slate-400 mb-3 text-xs uppercase tracking-wide">Tech Stack</h4>
+                 <div className="flex flex-wrap gap-2">
+                    {project.techStack.map((tech, i) => (
+                      <span key={i} className="text-xs font-mono font-bold bg-white text-slate-600 px-3 py-1.5 rounded border border-slate-200 shadow-sm">
+                        {tech}
+                      </span>
+                    ))}
+                 </div>
+              </div>
+
+              <div className="flex gap-4 pt-2">
                 <a 
                   href={project.url} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition font-medium"
+                  className="flex-1 bg-slate-900 text-white px-6 py-4 rounded-xl font-bold hover:bg-slate-800 transition flex items-center justify-center gap-2 shadow-xl shadow-slate-900/10 group"
                 >
-                  <Globe className="w-4 h-4" /> Visit Live Platform
+                  Visit Platform <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
                 </a>
                 {project.dashboardUrl && (
                   <a 
                     href={project.dashboardUrl} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition font-medium"
+                    className="px-6 py-4 rounded-xl font-bold border border-slate-200 text-slate-700 hover:bg-slate-50 transition flex items-center justify-center gap-2"
                   >
-                    <Layout className="w-4 h-4" /> View Dashboard
+                    <Layout className="w-4 h-4" /> Dashboard
                   </a>
                 )}
               </div>
             </div>
+
           </div>
         ))}
       </div>

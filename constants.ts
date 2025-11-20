@@ -1,3 +1,4 @@
+
 import { ActivityItem, Certification, PhaseStatus, StudyResource, StudySession } from "./types";
 
 export const INITIAL_CERTIFICATIONS: Certification[] = [
@@ -72,11 +73,13 @@ export const RECENT_ACTIVITY: ActivityItem[] = [
 ];
 
 export const STUDY_RESOURCES: StudyResource[] = [
-  { id: 'r1', title: 'Will Prowse Solar Blueprints', url: '#', type: 'video', category: 'Technical' },
-  { id: 'r2', title: 'Solar Professor: PV 101', url: '#', type: 'video', category: 'Basics' },
-  { id: 'r3', title: 'HeatSpring Practice Exam', url: '#', type: 'exam', category: 'Assessment' },
-  { id: 'r4', title: 'Rose City Robotics Free Tests', url: '#', type: 'exam', category: 'Assessment' },
-  { id: 'r5', title: 'NEC 2020 Code Book', url: '#', type: 'article', category: 'Code' }
+  { id: 'r1', title: 'Will Prowse Solar Blueprints', url: 'https://www.youtube.com/c/WillProwse', type: 'video', category: 'Technical' },
+  { id: 'r2', title: 'Solar Professor: PV 101', url: 'https://www.solarprofessor.com/', type: 'video', category: 'Basics' },
+  { id: 'r3', title: 'HeatSpring Practice Exam', url: 'https://www.heatspring.com/', type: 'exam', category: 'Assessment' },
+  { id: 'r4', title: 'Rose City Robotics Free Tests', url: 'https://rosecityrobotics.com/', type: 'exam', category: 'Assessment' },
+  { id: 'r5', title: 'NEC 2020 Code Book', url: 'https://www.nfpa.org/codes-and-standards/all-codes-and-standards/list-of-codes-and-standards/detail?code=70', type: 'article', category: 'Code' },
+  { id: 'r6', title: 'Enphase IQ8 Install Guide', url: 'https://enphase.com/installers/resources/documentation', type: 'article', category: 'Technical Specs' },
+  { id: 'r7', title: 'IronRidge Design Assistant', url: 'https://base.ironridge.com/', type: 'design_tool', category: 'Mounting' }
 ];
 
 export const INITIAL_SESSIONS: StudySession[] = [

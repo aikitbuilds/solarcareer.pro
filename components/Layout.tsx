@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Sun, LayoutDashboard, Award, DollarSign, Users, Bot, Menu, X, LogOut, Briefcase, FolderKanban } from 'lucide-react';
+import { Sun, LayoutDashboard, Award, DollarSign, Users, Bot, Menu, X, LogOut, Briefcase, FolderKanban, GitBranch } from 'lucide-react';
 
 interface Props {
   children: React.ReactNode;
@@ -49,6 +50,10 @@ export const Layout: React.FC<Props> = ({ children, activePage, onNavigate }) =>
             <p className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Tools</p>
           </div>
           <NavItem page="ai-coach" icon={Bot} label="AI Coach" />
+          <div className="pt-4 pb-2">
+            <p className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Admin</p>
+          </div>
+          <NavItem page="app-roadmap" icon={GitBranch} label="App Roadmap" />
         </nav>
 
         <div className="p-4 border-t border-slate-100">
@@ -83,6 +88,7 @@ export const Layout: React.FC<Props> = ({ children, activePage, onNavigate }) =>
             <NavItem page="financials" icon={DollarSign} label="Financials" />
             <NavItem page="investors" icon={Users} label="Investors" />
             <NavItem page="ai-coach" icon={Bot} label="AI Coach" />
+            <NavItem page="app-roadmap" icon={GitBranch} label="App Roadmap" />
           </nav>
         </div>
       )}

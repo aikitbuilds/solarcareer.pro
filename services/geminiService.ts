@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 
 const apiKey = process.env.API_KEY || '';
@@ -39,5 +40,123 @@ export const askSolarCoach = async (question: string): Promise<string> => {
   } catch (error) {
     console.error("Gemini API Error:", error);
     return "The Solar Coach is currently offline (API Error).";
+  }
+};
+
+export const getCareerAudit = async (): Promise<string> => {
+  if (!ai) return "Error: API Key not found.";
+
+  try {
+    const response: GenerateContentResponse = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `Analyze the career profile of Michael Tran. 
+      Current Status: Studying for NABCEP PV Associate (15% complete).
+      Target: Solar Project Manager ($137k/yr) by Aug 2026.
+      
+      Identify 5 specific, high-impact "Improvement Actions" or "Speed Hacks" to accelerate this timeline. 
+      Focus on high-leverage activities (e.g., specific software to learn like Helioscope/PVSyst, networking strategies, specific hands-on skills).
+      
+      Format the output as a clean, bulleted list with a bold title for each point, followed by a brief explanation.`,
+    });
+    return response.text || "No audit generated.";
+  } catch (error) {
+    console.error("Gemini API Error:", error);
+    return "The Career Audit system is currently offline (API Error).";
+  }
+};
+
+export const analyzeReflection = async (entry: string, type: 'Morning Plan' | 'Evening Review'): Promise<string> => {
+  if (!ai) return "Error: API Key not found.";
+
+  try {
+    const response: GenerateContentResponse = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `You are the "Accountability Mirror" AI. Your persona is a mix of David Goggins (Mental Toughness) and Elon Musk (First Principles Thinking).
+      
+      The user has submitted a ${type}: "${entry}"
+      
+      Your Task:
+      1. Analyze the entry for weakness, excuses, or redundancy.
+      2. Provide 3 bullet points of highly specific, actionable feedback.
+      3. **CRITICAL REQUIREMENT**: You MUST reference specific principles in your advice.
+         - Instead of "work harder", say: "Apply the **40% Rule**. You hit a wall? You're only 40% done. The rest is mental. Push."
+         - Instead of "be smarter", say: "Use **First Principles**. Boil this problem down to its physics. What is the fundamental constraint?"
+         - Instead of "be honest", say: "Look in the **Accountability Mirror**. Stop lying to yourself about the effort."
+         - Instead of "keep going", say: "Reach into the **Cookie Jar**. Remember when you passed the last module? Use that fuel."
+      
+      Tone: Ruthless, precise, no fluff. Do not be "encouraging" in a soft way. Be effective.`,
+    });
+    return response.text || "No feedback generated.";
+  } catch (error) {
+    console.error("Gemini API Error:", error);
+    return "Accountability System Offline.";
+  }
+};
+
+export const getDeepDiveContent = async (strategy: string): Promise<string> => {
+  if (!ai) return "Error: API Key not found.";
+
+  try {
+    const response: GenerateContentResponse = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `You are an Elite Performance Coach specializing in the methods of David Goggins and Elon Musk.
+      
+      The user requested a Deep Dive into the strategy: "${strategy}".
+      
+      Structure your response exactly like this:
+      1. **The Concept**: A powerful, no-nonsense definition of what this strategy is.
+      2. **Solar Career Application**: How specifically does this apply to studying for NABCEP exams or managing complex solar construction projects?
+      3. **The Drill**: A specific, immediate 5-minute exercise the user can do RIGHT NOW to apply this.
+      
+      Tone: Intense, authoritative, and highly motivating.`,
+    });
+    return response.text || "No content generated.";
+  } catch (error) {
+    console.error("Gemini API Error:", error);
+    return "Deep Dive Protocol Offline.";
+  }
+};
+
+export const getTacticalAdvice = async (phase: string, completed: string[], pending: string[]): Promise<string> => {
+  if (!ai) return "Error: API Key not found.";
+
+  try {
+    const response: GenerateContentResponse = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `You are a tactical performance coach.
+      Current Phase: ${phase}
+      Tasks Completed: ${completed.join(', ')}
+      Tasks Remaining: ${pending.join(', ')}
+      
+      Give me 2 sentences of high-intensity advice to finish the remaining tasks. If everything is done, congratulate me like a drill instructor.`,
+    });
+    return response.text || "No advice generated.";
+  } catch (error) {
+    console.error("Gemini API Error:", error);
+    return "Tactical Uplink Offline.";
+  }
+};
+
+export const draftInvestorUpdate = async (topic: string, context: string): Promise<string> => {
+  if (!ai) return "Error: API Key not found.";
+
+  try {
+    const response: GenerateContentResponse = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `You are Michael Tran's Investor Relations AI Assistant. Write a professional, confident email update to investors.
+      
+      Topic: ${topic}
+      Context: ${context}
+      Tone: Professional, transparent, high-energy, results-oriented.
+      
+      Format:
+      Subject: [Subject Line]
+      
+      [Body of the email]`,
+    });
+    return response.text || "No draft generated.";
+  } catch (error) {
+    console.error("Gemini API Error:", error);
+    return "Drafting System Offline.";
   }
 };

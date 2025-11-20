@@ -8,9 +8,10 @@ interface Props {
   progress: number;
   certifications: Certification[];
   recentActivity: ActivityItem[];
+  onNavigate: (page: string) => void;
 }
 
-export const Dashboard: React.FC<Props> = ({ userRole, progress, certifications, recentActivity }) => {
+export const Dashboard: React.FC<Props> = ({ userRole, progress, certifications, recentActivity, onNavigate }) => {
   const activeCert = certifications.find(c => c.status === 'In Progress');
   
   const progressData = [
@@ -163,19 +164,31 @@ export const Dashboard: React.FC<Props> = ({ userRole, progress, certifications,
         <div className="bg-gradient-to-b from-electric-600 to-electric-800 rounded-xl shadow-lg p-6 text-white">
           <h3 className="font-bold text-lg mb-6">Quick Actions</h3>
           <div className="space-y-3">
-            <button className="w-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-sm p-3 rounded-lg flex items-center justify-between transition group">
+            <button 
+              onClick={() => onNavigate('certifications')}
+              className="w-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-sm p-3 rounded-lg flex items-center justify-between transition group"
+            >
               <span className="font-medium">Log Study Session</span>
               <ArrowRight className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
             </button>
-             <button className="w-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-sm p-3 rounded-lg flex items-center justify-between transition group">
+             <button 
+              onClick={() => onNavigate('real-positions')}
+              className="w-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-sm p-3 rounded-lg flex items-center justify-between transition group"
+            >
               <span className="font-medium">Add Job Application</span>
               <ArrowRight className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
             </button>
-             <button className="w-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-sm p-3 rounded-lg flex items-center justify-between transition group">
+             <button 
+              onClick={() => onNavigate('investors')}
+              className="w-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-sm p-3 rounded-lg flex items-center justify-between transition group"
+            >
               <span className="font-medium">Investor Update</span>
               <ArrowRight className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
             </button>
-             <button className="w-full bg-solar-500 hover:bg-solar-400 text-white p-3 rounded-lg flex items-center justify-between transition font-bold mt-6 shadow-lg">
+             <button 
+              onClick={() => onNavigate('ai-coach')}
+              className="w-full bg-solar-500 hover:bg-solar-400 text-white p-3 rounded-lg flex items-center justify-between transition font-bold mt-6 shadow-lg"
+            >
               <span className="font-medium">Ask AI Coach</span>
               <Award className="w-5 h-5" />
             </button>

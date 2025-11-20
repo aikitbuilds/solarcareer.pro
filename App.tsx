@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
@@ -5,6 +6,9 @@ import { CertificationTracker } from './components/CertificationTracker';
 import { RealPositions } from './components/RealPositions';
 import { Portfolio } from './components/Portfolio';
 import { AICoach } from './components/AICoach';
+import { Financials } from './components/Financials';
+import { Investors } from './components/Investors';
+import { ProjectRoadmap } from './components/ProjectRoadmap';
 import { UserRole } from './types';
 import { INITIAL_CERTIFICATIONS, RECENT_ACTIVITY } from './constants';
 
@@ -21,6 +25,7 @@ const App: React.FC = () => {
             progress={15} 
             certifications={INITIAL_CERTIFICATIONS}
             recentActivity={RECENT_ACTIVITY}
+            onNavigate={setCurrentPage}
           />
         );
       case 'certifications':
@@ -36,24 +41,11 @@ const App: React.FC = () => {
           </div>
         );
       case 'financials':
+        return <Financials />;
       case 'investors':
-        return (
-          <div className="flex flex-col items-center justify-center h-96 text-center bg-white rounded-xl border border-slate-200 border-dashed p-8">
-            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-               <span className="text-2xl">🚧</span>
-            </div>
-            <h2 className="text-xl font-bold text-slate-800 mb-2">Under Construction</h2>
-            <p className="text-slate-500 max-w-md">
-              The {currentPage === 'financials' ? 'Financial Planning' : 'Investor Relations'} module is scheduled for development in Phase 2 of the app roadmap.
-            </p>
-            <button 
-              onClick={() => setCurrentPage('dashboard')}
-              className="mt-6 text-electric-600 font-medium hover:underline"
-            >
-              Return to Dashboard
-            </button>
-          </div>
-        );
+        return <Investors />;
+      case 'app-roadmap':
+        return <ProjectRoadmap />;
       default:
         return <div>Page not found</div>;
     }
