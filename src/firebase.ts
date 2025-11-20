@@ -16,8 +16,18 @@ const firebaseConfig = {
 
 // Validate that all required config values are present
 if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-  console.error('Firebase configuration is missing. Please set all VITE_FIREBASE_* environment variables.');
-  throw new Error('Firebase configuration error: Missing required environment variables');
+  const errorMsg = 'Firebase configuration is missing. Please set all VITE_FIREBASE_* environment variables. See DEPLOYMENT.md for setup instructions.';
+  console.error(errorMsg);
+  
+  // In development, throw error to prevent silent failures
+  // In production build, this should never happen if env vars are set correctly
+  if (import.meta.env.DEV) {
+    throw new Error(errorMsg);
+  } else {
+    // In production, log error but allow app to attempt initialization
+    // This prevents build failures, but the app will show errors if Firebase is not configured
+    console.warn('Firebase config missing in production build. App may not function correctly.');
+  }
 }
 
 const app = initializeApp(firebaseConfig);

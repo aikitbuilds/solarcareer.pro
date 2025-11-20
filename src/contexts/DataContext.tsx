@@ -61,10 +61,35 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           lastSaved: new Date().toISOString()
         }));
       } else {
-        // Initialize new user
+        // Initialize new user with onboarding state
         setDoc(doc(db, 'users', userId), { 
             userRole: UserRole.ADMIN,
-            createdAt: new Date().toISOString()
+            onboarding: {
+              completed: false,
+              currentStep: 0,
+              completedSteps: [],
+              startedAt: new Date().toISOString()
+            },
+            profile: {
+              displayName: currentUser.displayName || '',
+              email: currentUser.email || '',
+              photoURL: currentUser.photoURL || null,
+              createdAt: new Date().toISOString(),
+              lastLoginAt: new Date().toISOString(),
+            },
+            settings: {
+              theme: 'light',
+              notifications: {
+                email: true,
+                push: true,
+                weeklyRecap: true,
+              },
+              defaultView: 'dashboard',
+              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            version: 1
         }, { merge: true });
       }
     });

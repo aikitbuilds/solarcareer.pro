@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sun, LayoutDashboard, Award, DollarSign, Users, Bot, Menu, X, LogOut, Briefcase, FolderKanban, GitBranch, Settings, Book, Wifi, WifiOff, Cloud, ExternalLink, ChevronRight, PieChart, ShieldCheck } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Props {
   children: React.ReactNode;
@@ -13,6 +14,16 @@ export const Layout: React.FC<Props> = ({ children, activePage, onNavigate }) =>
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const { data } = useData();
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      // The AuthContext will update currentUser to null, which will trigger App.tsx to show Login
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -197,7 +208,10 @@ export const Layout: React.FC<Props> = ({ children, activePage, onNavigate }) =>
              </div>
              <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`}></div>
           </div>
-          <button className="flex items-center gap-3 px-3 py-2 w-full text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 group">
+          <button 
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-3 py-2 w-full text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 group"
+          >
             <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
             <span className="text-sm font-medium">Sign Out</span>
           </button>

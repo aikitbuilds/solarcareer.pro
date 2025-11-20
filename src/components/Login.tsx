@@ -5,8 +5,10 @@ import {
   Award, TrendingUp, Brain, DollarSign, Users, BarChart3,
   Zap, Target, BookOpen, MapPin, Clock, ArrowRight, Sparkles,
   ExternalLink, Calculator, TrendingDown, Percent, DollarSign as DollarIcon,
-  Briefcase, Building2, Rocket, Lock, CheckCircle
+  Briefcase, Building2, Rocket, Lock, CheckCircle, Activity, PieChart,
+  LineChart, ArrowUpRight, Star, Globe, Battery, Gauge
 } from 'lucide-react';
+import { LineChart as RechartsLineChart, Line, AreaChart, Area, BarChart, Bar, PieChart as RechartsPieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 export const Login: React.FC = () => {
   const { loginWithGoogle } = useAuth();
@@ -18,6 +20,31 @@ export const Login: React.FC = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const portfolioRef = useRef<HTMLDivElement>(null);
   const calculatorRef = useRef<HTMLDivElement>(null);
+  const statsRef = useRef<HTMLDivElement>(null);
+
+  // Sample data for charts
+  const careerGrowthData = [
+    { month: 'Jan', certifications: 0, projects: 0, income: 0 },
+    { month: 'Feb', certifications: 1, projects: 2, income: 5000 },
+    { month: 'Mar', certifications: 1, projects: 5, income: 12000 },
+    { month: 'Apr', certifications: 2, projects: 8, income: 20000 },
+    { month: 'May', certifications: 2, projects: 12, income: 32000 },
+    { month: 'Jun', certifications: 3, projects: 18, income: 48000 },
+  ];
+
+  const certificationDistribution = [
+    { name: 'NABCEP PV Associate', value: 35, color: '#3B82F6' },
+    { name: 'NABCEP PV Installer', value: 28, color: '#F59E0B' },
+    { name: 'NABCEP PV Designer', value: 22, color: '#10B981' },
+    { name: 'NABCEP PV Technical Sales', value: 15, color: '#8B5CF6' },
+  ];
+
+  const roiComparisonData = [
+    { period: '3mo', traditional: 2, solarcareer: 8 },
+    { period: '6mo', traditional: 5, solarcareer: 15 },
+    { period: '12mo', traditional: 10, solarcareer: 28 },
+    { period: '24mo', traditional: 20, solarcareer: 45 },
+  ];
 
   const handleLogin = async () => {
     setIsLoggingIn(true);
@@ -50,7 +77,7 @@ export const Login: React.FC = () => {
       });
     }, observerOptions);
 
-    const elements = [heroRef.current, portfolioRef.current, calculatorRef.current].filter(Boolean);
+    const elements = [heroRef.current, portfolioRef.current, calculatorRef.current, statsRef.current].filter(Boolean);
     elements.forEach(el => el && observer.observe(el));
 
     return () => {
@@ -73,11 +100,25 @@ export const Login: React.FC = () => {
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-        {/* Animated background */}
+        {/* Solar Installation Background Image */}
         <div className="absolute inset-0">
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{
+              backgroundImage: 'url(https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=2070&auto=format&fit=crop)',
+              opacity: 0.15
+            }}
+          ></div>
+          {/* Dark overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-slate-900/80"></div>
+        </div>
+        
+        {/* Animated background with grid */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-electric-500/20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-solar-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-solar-500/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-orange-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
         </div>
 
         {/* Navigation */}
@@ -90,8 +131,9 @@ export const Login: React.FC = () => {
               <span className="text-2xl font-extrabold text-white">SolarCareer<span className="text-electric-400">.Pro</span></span>
             </div>
             <div className="hidden md:flex items-center gap-6 text-white/80 text-sm">
+              <a href="#stats" className="hover:text-white transition">Stats</a>
               <a href="#portfolio" className="hover:text-white transition">Portfolio</a>
-              <a href="#roi-calculator" className="hover:text-white transition">ROI Calculator</a>
+              <a href="#roi-calculator" className="hover:text-white transition">ROI</a>
               <a href="#features" className="hover:text-white transition">Features</a>
             </div>
           </div>
@@ -109,8 +151,16 @@ export const Login: React.FC = () => {
             {/* Main Headline */}
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold text-white mb-6 leading-tight animate-fade-in-up">
               Transform Your Career in
-              <span className="block bg-gradient-to-r from-solar-400 via-electric-400 to-purple-400 bg-clip-text text-transparent animate-gradient">
-                Solar Energy
+              <span className="block relative">
+                <span 
+                  className="inline-block bg-gradient-to-r from-orange-400 via-yellow-400 to-orange-500 bg-clip-text text-transparent animate-gradient"
+                  style={{
+                    filter: 'drop-shadow(0 0 20px rgba(251, 146, 60, 0.8)) drop-shadow(0 0 40px rgba(251, 146, 60, 0.6)) drop-shadow(0 0 60px rgba(251, 146, 60, 0.4))',
+                    animation: 'glow-pulse 2s ease-in-out infinite alternate, gradient 3s ease infinite'
+                  }}
+                >
+                  Solar Energy
+                </span>
               </span>
             </h1>
 
@@ -146,10 +196,10 @@ export const Login: React.FC = () => {
                 )}
               </button>
               <a 
-                href="#portfolio"
+                href="#stats"
                 className="px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white font-semibold rounded-xl hover:bg-white/20 transition-all duration-200"
               >
-                View Portfolio
+                View Stats
               </a>
             </div>
 
@@ -187,6 +237,174 @@ export const Login: React.FC = () => {
         {/* Scroll Indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
           <ArrowRight className="w-6 h-6 text-white/50 rotate-90" />
+        </div>
+      </section>
+
+      {/* Stats Section with Charts */}
+      <section id="stats" ref={statsRef} className="py-20 bg-gradient-to-b from-white to-slate-50">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4">
+              Real Results, Real Growth
+            </h2>
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+              See how SolarCareer.Pro users accelerate their careers
+            </p>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid md:grid-cols-4 gap-6 mb-16">
+            <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-shadow">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-white" />
+                </div>
+                <span className="text-2xl font-extrabold text-slate-900">3.2x</span>
+              </div>
+              <p className="text-slate-600 font-medium">Faster Career Growth</p>
+              <p className="text-sm text-slate-400 mt-1">vs traditional methods</p>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-shadow">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center">
+                  <Award className="w-6 h-6 text-white" />
+                </div>
+                <span className="text-2xl font-extrabold text-slate-900">85%</span>
+              </div>
+              <p className="text-slate-600 font-medium">Certification Success</p>
+              <p className="text-sm text-slate-400 mt-1">NABCEP pass rate</p>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-shadow">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
+                  <DollarSign className="w-6 h-6 text-white" />
+                </div>
+                <span className="text-2xl font-extrabold text-slate-900">$48K</span>
+              </div>
+              <p className="text-slate-600 font-medium">Avg. Income Increase</p>
+              <p className="text-sm text-slate-400 mt-1">In first 6 months</p>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-100 hover:shadow-xl transition-shadow">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
+                <span className="text-2xl font-extrabold text-slate-900">2.5K+</span>
+              </div>
+              <p className="text-slate-600 font-medium">Active Professionals</p>
+              <p className="text-sm text-slate-400 mt-1">Growing daily</p>
+            </div>
+          </div>
+
+          {/* Charts Grid */}
+          <div className="grid lg:grid-cols-2 gap-8">
+            {/* Career Growth Chart */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-100">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-2xl font-bold text-slate-900 mb-2">Career Growth Trajectory</h3>
+                  <p className="text-slate-600">6-month progress tracking</p>
+                </div>
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                  <LineChart className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={careerGrowthData}>
+                  <defs>
+                    <linearGradient id="colorCertifications" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="colorProjects" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#F59E0B" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="month" stroke="#64748b" />
+                  <YAxis stroke="#64748b" />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#1e293b', 
+                      border: 'none', 
+                      borderRadius: '8px',
+                      color: '#fff'
+                    }} 
+                  />
+                  <Legend />
+                  <Area type="monotone" dataKey="certifications" stroke="#3B82F6" fillOpacity={1} fill="url(#colorCertifications)" name="Certifications" />
+                  <Area type="monotone" dataKey="projects" stroke="#F59E0B" fillOpacity={1} fill="url(#colorProjects)" name="Projects" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Certification Distribution */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-100">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-2xl font-bold text-slate-900 mb-2">Certification Distribution</h3>
+                  <p className="text-slate-600">Popular NABCEP paths</p>
+                </div>
+                <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center">
+                  <PieChart className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <ResponsiveContainer width="100%" height={300}>
+                <RechartsPieChart>
+                  <Pie
+                    data={certificationDistribution}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {certificationDistribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </RechartsPieChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* ROI Comparison */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-100 lg:col-span-2">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-2xl font-bold text-slate-900 mb-2">ROI Comparison</h3>
+                  <p className="text-slate-600">Career growth vs traditional methods</p>
+                </div>
+                <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
+                  <BarChart3 className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={roiComparisonData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="period" stroke="#64748b" />
+                  <YAxis stroke="#64748b" />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#1e293b', 
+                      border: 'none', 
+                      borderRadius: '8px',
+                      color: '#fff'
+                    }} 
+                  />
+                  <Legend />
+                  <Bar dataKey="traditional" fill="#94a3b8" name="Traditional Path" radius={[8, 8, 0, 0]} />
+                  <Bar dataKey="solarcareer" fill="#3B82F6" name="SolarCareer.Pro" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -453,7 +671,7 @@ export const Login: React.FC = () => {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Feature cards - same as before but with scroll animations */}
+            {/* Feature cards */}
             <div className="group p-8 bg-gradient-to-br from-blue-50 to-electric-50 rounded-2xl border border-blue-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-electric-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Award className="w-7 h-7 text-white" />
@@ -500,7 +718,7 @@ export const Login: React.FC = () => {
                   <span>Performance analysis</span>
                 </li>
               </ul>
-            </div>
+        </div>
 
             <div className="group p-8 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl border border-green-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
@@ -538,23 +756,23 @@ export const Login: React.FC = () => {
           <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
             Join professionals who are accelerating their solar careers with AI-powered insights and comprehensive tracking.
           </p>
-          <button 
-            onClick={handleLogin}
-            disabled={isLoggingIn}
+             <button 
+               onClick={handleLogin}
+               disabled={isLoggingIn}
             className="px-10 py-5 bg-white text-electric-600 font-bold rounded-xl shadow-2xl hover:scale-105 transition-all duration-200 flex items-center gap-3 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoggingIn ? (
+             >
+               {isLoggingIn ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
                 <span>Connecting...</span>
               </>
-            ) : (
+               ) : (
               <>
                 <span>Get Started Free</span>
                 <ArrowRight className="w-5 h-5" />
               </>
-            )}
-          </button>
+               )}
+             </button>
           <p className="mt-6 text-blue-200 text-sm">
             <ShieldCheck className="w-4 h-4 inline mr-2" />
             Free to start • No credit card required • Secure & Private
@@ -574,7 +792,7 @@ export const Login: React.FC = () => {
             </div>
             <p className="text-sm">
               © 2025 SolarCareer.Pro - Mission Control for Your Solar Career
-            </p>
+             </p>
           </div>
         </div>
       </footer>
@@ -595,12 +813,35 @@ export const Login: React.FC = () => {
           opacity: 0;
         }
         @keyframes gradient {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
+          0%, 100% { 
+            background-position: 0% 50%; 
+          }
+          50% { 
+            background-position: 100% 50%; 
+          }
+        }
+        @keyframes glow-pulse {
+          0% {
+            filter: drop-shadow(0 0 20px rgba(251, 146, 60, 0.8)) 
+                    drop-shadow(0 0 40px rgba(251, 146, 60, 0.6)) 
+                    drop-shadow(0 0 60px rgba(251, 146, 60, 0.4))
+                    drop-shadow(0 0 80px rgba(234, 179, 8, 0.3));
+            text-shadow: 0 0 20px rgba(251, 146, 60, 0.8),
+                         0 0 40px rgba(251, 146, 60, 0.6),
+                         0 0 60px rgba(234, 179, 8, 0.4);
+          }
+          100% {
+            filter: drop-shadow(0 0 30px rgba(251, 146, 60, 1)) 
+                    drop-shadow(0 0 60px rgba(251, 146, 60, 0.8)) 
+                    drop-shadow(0 0 90px rgba(251, 146, 60, 0.6))
+                    drop-shadow(0 0 120px rgba(234, 179, 8, 0.5));
+            text-shadow: 0 0 30px rgba(251, 146, 60, 1),
+                         0 0 60px rgba(251, 146, 60, 0.8),
+                         0 0 90px rgba(234, 179, 8, 0.6);
+          }
         }
         .animate-gradient {
           background-size: 200% 200%;
-          animation: gradient 3s ease infinite;
         }
       `}</style>
     </div>

@@ -26,6 +26,7 @@ dist-ssr
 # Build scripts with secrets
 scripts/build-with-env.ps1
 scripts/build-with-env.sh
+deploy.ps1
 
 # Firebase
 .firebase/

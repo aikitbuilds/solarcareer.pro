@@ -1,12 +1,15 @@
-import React, { useState, Suspense, lazy } from 'react';
+import React, { useState, Suspense, lazy, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { UserRole } from './types';
 import { INITIAL_CERTIFICATIONS, RECENT_ACTIVITY } from './constants';
 import { DataProvider } from './contexts/DataContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Login } from './components/Login';
+import { Onboarding } from './components/Onboarding';
 import { Loader2 } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from './firebase';
 
 // Lazy Load Pages
 const Dashboard = lazy(() => import('./components/Dashboard').then(module => ({ default: module.Dashboard })));
@@ -33,9 +36,54 @@ const AuthenticatedApp: React.FC = () => {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [userRole, setUserRole] = useState<UserRole>(UserRole.ADMIN);
   const [navAction, setNavAction] = useState<string | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState<boolean | null>(null);
+  const [loadingOnboarding, setLoadingOnboarding] = useState(true);
+
+  useEffect(() => {
+    const checkOnboardingStatus = async () => {
+      if (!currentUser) {
+        setLoadingOnboarding(false);
+        return;
+      }
+
+      try {
+        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          const onboardingCompleted = data.onboarding?.completed ?? false;
+          setShowOnboarding(!onboardingCompleted);
+        } else {
+          // New user - show onboarding
+          setShowOnboarding(true);
+        }
+      } catch (error) {
+        console.error('Error checking onboarding status:', error);
+        setShowOnboarding(false);
+      } finally {
+        setLoadingOnboarding(false);
+      }
+    };
+
+    checkOnboardingStatus();
+  }, [currentUser]);
 
   if (!currentUser) {
     return <Login />;
+  }
+
+  if (loadingOnboarding) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-center">
+          <Loader2 className="w-10 h-10 animate-spin text-electric-500 mx-auto mb-4" />
+          <p className="text-slate-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (showOnboarding) {
+    return <Onboarding />;
   }
 
   const renderPage = () => {

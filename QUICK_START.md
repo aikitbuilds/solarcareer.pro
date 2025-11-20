@@ -4,7 +4,22 @@
 
 Since we removed hardcoded secrets for security, you need to set environment variables before building.
 
-### Quick Setup (One-time)
+### Recommended: Use Deployment Script
+
+The easiest way to deploy is using the provided script:
+
+```powershell
+npm run deploy:prod
+```
+
+Or directly:
+```powershell
+powershell -ExecutionPolicy Bypass -File deploy.ps1
+```
+
+This script automatically sets all required environment variables and builds/deploys.
+
+### Alternative: Manual Setup
 
 Create a `.env.production` file in the project root (this file is gitignored):
 
