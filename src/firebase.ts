@@ -2,39 +2,25 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-// Production Firebase configuration for solarcareer-a1106
+// Firebase configuration from environment variables
+// All values must be set in .env.local for local development
+// For production, set them in Firebase Hosting environment variables or build-time env vars
 const firebaseConfig = {
-  apiKey: 'AIzaSyBslJZB5r-ZjswWeYj3CyWxHpCYIZqsK9I',
-  authDomain: 'solarcareer-a1106.firebaseapp.com',
-  projectId: 'solarcareer-a1106',
-  storageBucket: 'solarcareer-a1106.firebasestorage.app',
-  messagingSenderId: '793049419872',
-  appId: '1:793049419872:web:40a28bc5ef015421a6f305'
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '',
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || '',
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || '',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || ''
 };
 
-// Use environment variables if they're set and not empty (for local development)
-const config = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY && import.meta.env.VITE_FIREBASE_API_KEY.trim() !== '' 
-    ? import.meta.env.VITE_FIREBASE_API_KEY 
-    : firebaseConfig.apiKey,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN && import.meta.env.VITE_FIREBASE_AUTH_DOMAIN.trim() !== '' 
-    ? import.meta.env.VITE_FIREBASE_AUTH_DOMAIN 
-    : firebaseConfig.authDomain,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID && import.meta.env.VITE_FIREBASE_PROJECT_ID.trim() !== '' 
-    ? import.meta.env.VITE_FIREBASE_PROJECT_ID 
-    : firebaseConfig.projectId,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET && import.meta.env.VITE_FIREBASE_STORAGE_BUCKET.trim() !== '' 
-    ? import.meta.env.VITE_FIREBASE_STORAGE_BUCKET 
-    : firebaseConfig.storageBucket,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID && import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID.trim() !== '' 
-    ? import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID 
-    : firebaseConfig.messagingSenderId,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID && import.meta.env.VITE_FIREBASE_APP_ID.trim() !== '' 
-    ? import.meta.env.VITE_FIREBASE_APP_ID 
-    : firebaseConfig.appId
-};
+// Validate that all required config values are present
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+  console.error('Firebase configuration is missing. Please set all VITE_FIREBASE_* environment variables.');
+  throw new Error('Firebase configuration error: Missing required environment variables');
+}
 
-const app = initializeApp(config);
+const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();

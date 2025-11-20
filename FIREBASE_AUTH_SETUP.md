@@ -81,6 +81,7 @@ If you continue to experience issues:
 
 **Project Details:**
 - Project ID: `solarcareer-a1106`
-- Project Number: `793049419872`
 - Hosting URL: https://solarcareer-a1106.web.app
+
+**Note:** All Firebase configuration values should be stored in environment variables (`.env.local`) and never committed to the repository. See `env.example` for the required variables.
 
