@@ -8,40 +8,8 @@
     <meta name="theme-color" content="#3B82F6" />
     
     <!-- Performance: Preconnect to critical domains -->
-    <link rel="preconnect" href="https://cdn.tailwindcss.com" />
     <link rel="preconnect" href="https://images.unsplash.com" />
     <link rel="preconnect" href="https://file-s3-assets.ai-studio-assets.com" />
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              solar: {
-                500: '#F59E0B', // Solar Gold
-                600: '#D97706',
-              },
-              electric: {
-                500: '#3B82F6', // Electric Blue
-                600: '#2563EB',
-                900: '#1E3A8A',
-              }
-            },
-            animation: {
-              'spin-slow': 'spin 8s linear infinite',
-              'fade-in': 'fadeIn 0.5s ease-out',
-            },
-            keyframes: {
-              fadeIn: {
-                '0%': { opacity: '0' },
-                '100%': { opacity: '1' },
-              }
-            }
-          }
-        }
-      }
-    </script>
   <script type="importmap">
 {
   "imports": {
@@ -65,19 +33,6 @@
   <body class="bg-slate-50 text-slate-900 antialiased">
     <div id="root"></div>
     <!-- Entry point for Vite build -->
-    <script type="module" src="/index.tsx"></script>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then(registration => {
-              console.log('SW registered: ', registration);
-            })
-            .catch(registrationError => {
-              console.log('SW registration failed: ', registrationError);
-            });
-        });
-      }
-    </script>
+    <script type="module" src="/src/index.tsx"></script>
   </body>
 </html>

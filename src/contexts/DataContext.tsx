@@ -25,6 +25,9 @@ interface DataContextType {
   loading: boolean;
   updateData: (newData: Partial<AppData>) => Promise<void>;
   resetDatabase: () => void;
+  exportDatabase?: () => void;
+  importDatabase?: (file: File) => Promise<boolean>;
+  exportFramework?: () => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -165,8 +168,64 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
   };
 
+  const exportDatabase = () => {
+    const jsonString = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const href = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = href;
+    link.download = `solarcareer_backup_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportFramework = () => {
+    const framework: AppData = {
+      ...data,
+      userRole: UserRole.ADMIN,
+      investors: [],
+      investorUpdates: [],
+      journal: [],
+      weeklyRecaps: [],
+      fieldLogs: [],
+      syncSettings: { externalAppUrl: '', isConnected: false, lastSync: null },
+      lastSaved: new Date().toISOString()
+    };
+    const jsonString = JSON.stringify(framework, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const href = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = href;
+    link.download = `framework_template_v1.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const importDatabase = async (file: File): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const parsed = JSON.parse(e.target?.result as string);
+          if (parsed.routineTasks || parsed.certifications) {
+            await updateData(parsed);
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+        } catch (err) {
+          console.error("Import failed", err);
+          resolve(false);
+        }
+      };
+      reader.readAsText(file);
+    });
+  };
+
   return (
-    <DataContext.Provider value={{ data, loading, updateData, resetDatabase }}>
+    <DataContext.Provider value={{ data, loading, updateData, resetDatabase, exportDatabase, importDatabase, exportFramework }}>
       {children}
     </DataContext.Provider>
   );

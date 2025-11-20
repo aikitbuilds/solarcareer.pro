@@ -198,5 +198,3 @@ export const Dashboard: React.FC<Props> = ({ userRole, progress, certifications,
     </div>
   );
 };
-
-export default Dashboard;

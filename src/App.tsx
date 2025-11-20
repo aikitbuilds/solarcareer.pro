@@ -9,11 +9,11 @@ import { Loader2 } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 
 // Lazy Load Pages
-const Dashboard = lazy(() => import('./components/Dashboard'));
-const CertificationTracker = lazy(() => import('./components/CertificationTracker'));
+const Dashboard = lazy(() => import('./components/Dashboard').then(module => ({ default: module.Dashboard })));
+const CertificationTracker = lazy(() => import('./components/CertificationTracker').then(module => ({ default: module.CertificationTracker })));
 const RealPositions = lazy(() => import('./components/RealPositions').then(module => ({ default: module.RealPositions })));
 const Portfolio = lazy(() => import('./components/Portfolio').then(module => ({ default: module.Portfolio })));
-const AICoach = lazy(() => import('./components/AICoach'));
+const AICoach = lazy(() => import('./components/AICoach').then(module => ({ default: module.AICoach })));
 const Financials = lazy(() => import('./components/Financials').then(module => ({ default: module.Financials })));
 const Investors = lazy(() => import('./components/Investors').then(module => ({ default: module.Investors })));
 const Workbook = lazy(() => import('./components/Workbook').then(module => ({ default: module.Workbook })));

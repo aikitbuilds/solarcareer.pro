@@ -306,3 +306,4 @@ export const analyzeBankStatement = async (base64Data: string, mimeType: string 
     return { text: "Failed to analyze document.", suggestedExpenses: [] };
   }
 };
+
