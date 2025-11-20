@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
-import { CheckCircle2, Circle, Clock, GitBranch, GitCommit, Bug, Zap, Layout, Server, Shield, Smartphone, Book, MapPin, Wifi, DollarSign } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, GitBranch, GitCommit, Bug, Zap, Layout, Server, Shield, Smartphone, Book, MapPin, Wifi, DollarSign, TrendingUp, BarChart3, PieChart as PieChartIcon } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, AreaChart, Area } from 'recharts';
 
 interface Task {
   id: string;
@@ -29,15 +30,40 @@ export const ProjectRoadmap: React.FC = () => {
     { id: '12', title: 'Offline Mode (PWA)', category: 'Frontend', status: 'Done', priority: 'High' },
     { id: '13', title: 'Rich Text CRM Editor', category: 'Frontend', status: 'Done', priority: 'Medium' },
     { id: '14', title: 'Dynamic Portfolio Screenshots', category: 'Backend', status: 'Done', priority: 'Medium' },
+    { id: '15', title: 'Cloud Sync (Firebase)', category: 'Backend', status: 'Done', priority: 'High' },
+    { id: '16', title: 'Workbook & Planner', category: 'Frontend', status: 'Done', priority: 'High' },
     
     // In Progress
-    { id: '15', title: 'Beta Testing Phase 1 (Admin)', category: 'Docs', status: 'In Progress', priority: 'High' },
+    { id: '17', title: 'Beta Testing Phase 1 (Admin)', category: 'Docs', status: 'In Progress', priority: 'High' },
     
     // Upcoming / Beta
-    { id: '16', title: 'Stripe Payment Integration', category: 'Backend', status: 'Todo', priority: 'Low' },
-    { id: '17', title: 'User Auth (Google/Email)', category: 'Backend', status: 'Todo', priority: 'High' },
-    { id: '18', title: 'Multi-User Sync (Firebase)', category: 'Backend', status: 'Upcoming', priority: 'High' },
-    { id: '19', title: 'Automated Weekly Reports', category: 'AI', status: 'Upcoming', priority: 'Medium' }
+    { id: '18', title: 'Stripe Payment Integration', category: 'Backend', status: 'Todo', priority: 'Low' },
+    { id: '19', title: 'User Auth (Google/Email)', category: 'Backend', status: 'Todo', priority: 'High' },
+    { id: '20', title: 'Automated Weekly Reports', category: 'AI', status: 'Upcoming', priority: 'Medium' }
+  ];
+
+  // --- CHART DATA CALCULATION ---
+
+  // 1. Status Distribution (Pie)
+  const statusData = [
+    { name: 'Done', value: tasks.filter(t => t.status === 'Done').length, color: '#10B981' }, // Green
+    { name: 'In Progress', value: tasks.filter(t => t.status === 'In Progress').length, color: '#3B82F6' }, // Blue
+    { name: 'Pending', value: tasks.filter(t => t.status === 'Todo' || t.status === 'Upcoming').length, color: '#94A3B8' } // Slate
+  ];
+
+  // 2. Category Allocation (Bar)
+  const categories = ['Frontend', 'Backend', 'AI', 'Docs', 'Design'];
+  const categoryData = categories.map(cat => ({
+    name: cat,
+    count: tasks.filter(t => t.category === cat).length
+  }));
+
+  // 3. Velocity Simulation (Area) - Mock Data for visual
+  const velocityData = [
+    { sprint: 'Sprint 1', tasks: 4 },
+    { sprint: 'Sprint 2', tasks: 6 },
+    { sprint: 'Sprint 3', tasks: 5 },
+    { sprint: 'Current', tasks: 8 },
   ];
 
   const stats = {
@@ -93,38 +119,99 @@ export const ProjectRoadmap: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* App Development Header */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-electric-900 p-8 rounded-2xl shadow-lg text-white relative overflow-hidden">
+      <div className="bg-slate-900 p-8 rounded-2xl shadow-lg text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-electric-500/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
-        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <span className="px-3 py-1 bg-white/10 text-white text-xs font-bold rounded-full uppercase tracking-wider border border-white/20 flex items-center gap-2">
-                <GitBranch className="w-3 h-3" /> v1.4.0 (Feature Complete)
-              </span>
-              <span className="text-green-400 text-xs font-bold flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" /> Ready for Beta
-              </span>
+        <div className="relative z-10">
+            <div className="flex justify-between items-start">
+                <div>
+                    <div className="flex items-center gap-3 mb-2">
+                        <span className="px-3 py-1 bg-white/10 text-white text-xs font-bold rounded-full uppercase tracking-wider border border-white/20 flex items-center gap-2">
+                            <GitBranch className="w-3 h-3" /> v1.5.0
+                        </span>
+                        <span className="text-green-400 text-xs font-bold flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" /> Production Ready
+                        </span>
+                    </div>
+                    <h1 className="text-3xl font-bold mb-2">Dev Intelligence</h1>
+                    <p className="text-slate-300 max-w-2xl">
+                        Real-time analytics of the engineering roadmap and feature velocity.
+                    </p>
+                </div>
+                <div className="text-right">
+                    <div className="text-4xl font-bold text-electric-400">{stats.progress}%</div>
+                    <div className="text-xs text-slate-400 uppercase tracking-wider">Total Completion</div>
+                </div>
             </div>
-            <h1 className="text-3xl font-bold mb-2">App Development Roadmap</h1>
-            <p className="text-slate-300 max-w-2xl">
-              Tracking the construction of the SolarCareer Platform. All core modules are deployed.
-            </p>
-          </div>
-          
-          <div className="flex gap-8">
-            <div className="text-center">
-              <div className="text-3xl font-bold">{stats.progress}%</div>
-              <div className="text-xs text-slate-400 uppercase tracking-wider">Completion</div>
+        </div>
+      </div>
+
+      {/* CHART GRID */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Chart 1: Project Status */}
+        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+            <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <PieChartIcon className="w-4 h-4 text-slate-500" /> Project Health
+            </h3>
+            <div className="h-48 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                        <Pie
+                            data={statusData}
+                            innerRadius={60}
+                            outerRadius={80}
+                            paddingAngle={5}
+                            dataKey="value"
+                        >
+                            {statusData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                        </Pie>
+                        <Tooltip />
+                    </PieChart>
+                </ResponsiveContainer>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold">{tasks.length}</div>
-              <div className="text-xs text-slate-400 uppercase tracking-wider">Total Tasks</div>
+            <div className="flex justify-center gap-4 mt-2 text-xs font-bold text-slate-600">
+                {statusData.map(d => (
+                    <div key={d.name} className="flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: d.color }}></div>
+                        {d.name} ({d.value})
+                    </div>
+                ))}
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-400">{stats.done}</div>
-              <div className="text-xs text-slate-400 uppercase tracking-wider">Shipped</div>
+        </div>
+
+        {/* Chart 2: Effort Allocation */}
+        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+            <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-slate-500" /> Effort Allocation
+            </h3>
+            <div className="h-48 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={categoryData}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <XAxis dataKey="name" tick={{fontSize: 10}} axisLine={false} tickLine={false} />
+                        <Tooltip cursor={{fill: '#f8fafc'}} />
+                        <Bar dataKey="count" fill="#3B82F6" radius={[4, 4, 0, 0]} barSize={30} />
+                    </BarChart>
+                </ResponsiveContainer>
             </div>
-          </div>
+        </div>
+
+         {/* Chart 3: Velocity */}
+         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+            <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-slate-500" /> Development Velocity
+            </h3>
+            <div className="h-48 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={velocityData}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <XAxis dataKey="sprint" tick={{fontSize: 10}} axisLine={false} tickLine={false} />
+                        <Tooltip />
+                        <Area type="monotone" dataKey="tasks" stroke="#10B981" fill="#d1fae5" strokeWidth={2} />
+                    </AreaChart>
+                </ResponsiveContainer>
+            </div>
         </div>
       </div>
 
@@ -164,13 +251,13 @@ export const ProjectRoadmap: React.FC = () => {
               </div>
               <div>
                 <div className="flex items-center gap-3 mb-2">
-                  <h3 className="text-lg font-bold text-slate-800">v1.4.0 - Mobile & Field Ops</h3>
+                  <h3 className="text-lg font-bold text-slate-800">v1.5.0 - Workbook & Sync</h3>
                   <span className="text-xs text-slate-400">Today</span>
                 </div>
                 <ul className="space-y-2 text-sm text-slate-600 list-disc list-inside">
-                  <li>Added <strong>GPS Field Logger</strong> for verifying install hours.</li>
-                  <li>Enabled <strong>Offline PWA Mode</strong> with Service Worker caching.</li>
-                  <li>Updated Portfolio with dynamic screenshots.</li>
+                  <li>Added <strong>Workbook</strong> for daily planning and weekly reviews.</li>
+                  <li>Added <strong>Firebase Cloud Sync</strong> for connecting to SolarDrive.</li>
+                  <li>Added <strong>Analytics Dashboard</strong> to Dev Roadmap.</li>
                 </ul>
               </div>
             </div>

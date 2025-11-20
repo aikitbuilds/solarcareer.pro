@@ -1,8 +1,33 @@
+
 import React, { useState } from 'react';
-import { Briefcase, DollarSign, TrendingUp, ShieldCheck, MapPin, Calendar, CheckCircle2, AlertCircle, Building2, ArrowRight } from 'lucide-react';
+import { Briefcase, DollarSign, TrendingUp, ShieldCheck, MapPin, Calendar, CheckCircle2, AlertCircle, Building2, ArrowRight, BarChart3, PieChart as PieIcon } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 
 export const RealPositions: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'level1' | 'level2' | 'level3' | 'level4'>('overview');
+
+  // --- CHART DATA ---
+  const salaryData = [
+    { level: 'Start', salary: 35000 },
+    { level: 'L1: Assoc', salary: 52000 },
+    { level: 'L2: PVIP', salary: 78000 },
+    { level: 'L3: ESIP', salary: 88000 },
+    { level: 'L4: PM', salary: 137000 },
+  ];
+
+  const roiData = [
+    { name: 'L1', cost: 999, return: 4500 }, // Cost vs Monthly Income increment
+    { name: 'L2', cost: 2000, return: 6500 },
+    { name: 'L3', cost: 2500, return: 7500 },
+    { name: 'L4', cost: 2000, return: 11400 },
+  ];
+
+  const marketData = [
+    { name: 'Install', value: 45, color: '#F59E0B' }, // Solar Gold
+    { name: 'PM/Ops', value: 25, color: '#3B82F6' }, // Electric Blue
+    { name: 'Sales', value: 20, color: '#10B981' },  // Green
+    { name: 'Design', value: 10, color: '#8B5CF6' },  // Purple
+  ];
 
   const renderTabButton = (id: string, label: string, subtitle?: string) => (
     <button
@@ -30,6 +55,83 @@ export const RealPositions: React.FC = () => {
         <div>
           <h2 className="text-2xl font-bold text-slate-800">Real Positions & Market Data</h2>
           <p className="text-slate-500">Investment protection through guaranteed career earnings.</p>
+        </div>
+      </div>
+
+      {/* --- MINI DASHBOARD --- */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Chart 1: Salary Trajectory */}
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+             <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
+                <TrendingUp className="w-4 h-4 text-green-500" /> Career Income Growth
+            </h3>
+            <div className="h-32 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={salaryData}>
+                        <defs>
+                            <linearGradient id="colorSalary" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
+                                <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                            </linearGradient>
+                        </defs>
+                        <Tooltip contentStyle={{fontSize: '12px', borderRadius: '8px'}} formatter={(val: number) => `$${val.toLocaleString()}`} />
+                        <Area type="monotone" dataKey="salary" stroke="#10B981" fillOpacity={1} fill="url(#colorSalary)" strokeWidth={3} />
+                    </AreaChart>
+                </ResponsiveContainer>
+            </div>
+            <div className="flex justify-between text-xs text-slate-500 mt-2 font-bold">
+                <span>Entry ($35k)</span>
+                <span className="text-green-600">Peak ($137k)</span>
+            </div>
+        </div>
+
+        {/* Chart 2: ROI Speed */}
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+             <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
+                <DollarSign className="w-4 h-4 text-electric-500" /> Cost vs. Monthly Return
+            </h3>
+            <div className="h-32 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={roiData}>
+                        <Tooltip cursor={{fill: 'transparent'}} contentStyle={{fontSize: '12px', borderRadius: '8px'}} />
+                        <Bar dataKey="cost" stackId="a" fill="#94A3B8" name="Cert Cost" />
+                        <Bar dataKey="return" stackId="a" fill="#3B82F6" name="Monthly Salary" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                </ResponsiveContainer>
+            </div>
+            <div className="flex justify-center gap-4 text-xs text-slate-500 mt-2 font-bold">
+                <div className="flex items-center gap-1"><div className="w-2 h-2 bg-slate-400 rounded-full"></div> Cost</div>
+                <div className="flex items-center gap-1"><div className="w-2 h-2 bg-electric-500 rounded-full"></div> Income</div>
+            </div>
+        </div>
+
+        {/* Chart 3: Market Demand */}
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+             <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
+                <PieIcon className="w-4 h-4 text-solar-500" /> Job Type Distribution
+            </h3>
+            <div className="h-32 w-full flex gap-4 items-center">
+                <div className="flex-1 h-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie data={marketData} innerRadius={25} outerRadius={40} paddingAngle={5} dataKey="value">
+                                {marketData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </div>
+                <div className="flex-1 space-y-1">
+                    {marketData.map(d => (
+                        <div key={d.name} className="flex items-center gap-2 text-xs font-bold text-slate-600">
+                            <div className="w-2 h-2 rounded-full" style={{backgroundColor: d.color}}></div>
+                            {d.name}
+                        </div>
+                    ))}
+                </div>
+            </div>
         </div>
       </div>
 

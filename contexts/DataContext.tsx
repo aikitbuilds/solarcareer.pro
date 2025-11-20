@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { AppData, UserRole, Certification, Investor, InvestorUpdate, RoutineTask, JournalEntry, FieldLog, Expense } from '../types';
+import { AppData, UserRole, Certification, Investor, InvestorUpdate, RoutineTask, JournalEntry, FieldLog, Expense, WeeklyRecap } from '../types';
 import { INITIAL_CERTIFICATIONS } from '../constants';
 
 // Initial State Defaults
@@ -38,10 +38,11 @@ const DEFAULT_DATA: AppData = {
   investorUpdates: [],
   routineTasks: DEFAULT_TASKS,
   journal: [],
+  weeklyRecaps: [],
   fieldLogs: [],
   expenses: DEFAULT_EXPENSES,
   syncSettings: {
-    externalAppUrl: 'https://ai.studio/apps/drive/1qIg7lKGALfF_87ShNNomeTPWYo0jKitw',
+    externalAppUrl: 'https://ai-powered-life-transformation-dashboard-964230156163.us-west1.run.app',
     isConnected: false,
     lastSync: null
   },
@@ -84,7 +85,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             ...DEFAULT_DATA, 
             ...parsed,
             syncSettings: { ...DEFAULT_DATA.syncSettings, ...(parsed.syncSettings || {}) },
-            expenses: parsed.expenses || DEFAULT_EXPENSES
+            expenses: parsed.expenses || DEFAULT_EXPENSES,
+            weeklyRecaps: parsed.weeklyRecaps || []
         };
         setData(merged);
       } catch (e) {
@@ -113,3 +115,90 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const link = document.createElement('a');
     link.href = href;
     link.download = `solarcareer_backup_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportFramework = () => {
+      // Clone data but strip personal info
+      const framework: AppData = {
+          ...data,
+          userRole: UserRole.ADMIN,
+          investors: [], // Clear specific investors
+          investorUpdates: [],
+          journal: [], // Clear personal thoughts
+          weeklyRecaps: [],
+          fieldLogs: [], // Clear personal logs
+          // Keep Routine Tasks as they are the "Framework"
+          // Keep Expenses CATEGORIES but maybe clear values? (Optional, kept for now as example)
+          syncSettings: { ...DEFAULT_DATA.syncSettings },
+          lastSaved: new Date().toISOString()
+      };
+
+      const jsonString = JSON.stringify(framework, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const href = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = href;
+      link.download = `framework_template_v1.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  };
+
+  const importDatabase = async (file: File): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsed = JSON.parse(e.target?.result as string);
+          // Validate simplified check
+          if (parsed.routineTasks || parsed.certifications) {
+             // Migration logic same as load
+             if (parsed.routineTasks) {
+                parsed.routineTasks = parsed.routineTasks.map((t: any) => ({
+                    ...t,
+                    title: t.title || t.label,
+                    status: t.status || (t.completed ? 'Done' : 'Todo'),
+                    priority: t.priority || 'Medium',
+                    category: t.category || 'General'
+                }));
+            }
+            const merged = { ...DEFAULT_DATA, ...parsed };
+            setData(merged);
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+        } catch (err) {
+          console.error("Import failed", err);
+          resolve(false);
+        }
+      };
+      reader.readAsText(file);
+    });
+  };
+
+  const resetDatabase = () => {
+    if(window.confirm("Are you sure? This wipes all local data.")) {
+        setData(DEFAULT_DATA);
+        localStorage.removeItem('solar_career_db');
+        window.location.reload();
+    }
+  };
+
+  return (
+    <DataContext.Provider value={{ data, updateData, exportDatabase, exportFramework, importDatabase, resetDatabase }}>
+      {children}
+    </DataContext.Provider>
+  );
+};
+
+export const useData = () => {
+  const context = useContext(DataContext);
+  if (context === undefined) {
+    throw new Error('useData must be used within a DataProvider');
+  }
+  return context;
+};

@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 
 const apiKey = process.env.API_KEY || '';
@@ -29,16 +30,88 @@ export const askSolarCoach = async (question: string): Promise<string> => {
   try {
     const response: GenerateContentResponse = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: `You are an expert Solar Energy Master Trainer helping a student (Michael) prepare for the NABCEP PV Associate exam.
+      contents: `You are an expert Life & Career Strategy Coach.
       
-      Student Question: "${question}"
+      User Question: "${question}"
       
-      Provide a clear, concise explanation suitable for a solar professional. If calculation is needed, show steps. End with a motivating tip.`,
+      Provide a clear, concise explanation. If it's a technical question, provide steps. If it's life advice, use First Principles.`,
     });
     return response.text || "No answer generated.";
   } catch (error) {
     console.error("Gemini API Error:", error);
-    return "The Solar Coach is currently offline (API Error).";
+    return "The Coach is currently offline (API Error).";
+  }
+};
+
+export const researchCareerTopic = async (topic: string): Promise<string> => {
+  if (!ai) return "Error: API Key not found.";
+
+  try {
+    const response: GenerateContentResponse = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `Research the career/skill topic: "${topic}".
+      
+      Return a structured JSON response (DO NOT return markdown code blocks, just the raw JSON string) with:
+      {
+        "topic": "${topic}",
+        "summary": "Brief overview (2 sentences)",
+        "prerequisites": ["item 1", "item 2"],
+        "estimatedCost": "$X - $Y",
+        "timeline": "X months",
+        "resources": [ { "title": "Resource Name", "url": "https://..." } ]
+      }`,
+    });
+    return response.text || "{}";
+  } catch (error) {
+    console.error("Gemini API Error:", error);
+    return "{}";
+  }
+};
+
+export const generateWeeklyRecap = async (journalEntries: string[], tasksCompleted: number, totalTasks: number): Promise<string> => {
+  if (!ai) return "Error: API Key not found.";
+
+  try {
+    const response: GenerateContentResponse = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `You are a Senior Performance Coach. Analyze my week.
+      
+      Data:
+      - Tasks Completed: ${tasksCompleted}/${totalTasks}
+      - Journal Excerpts: ${JSON.stringify(journalEntries)}
+      
+      Output a JSON string (no markdown) with:
+      {
+        "keyWins": ["Win 1", "Win 2"],
+        "lessonsLearned": ["Lesson 1", "Lesson 2"],
+        "aiStrategyForNextWeek": "A paragraph of specific strategic advice for the upcoming week.",
+        "score": 85 (Calculate a score 0-100 based on the data)
+      }`,
+    });
+    return response.text || "{}";
+  } catch (error) {
+    console.error("Gemini API Error:", error);
+    return "{}";
+  }
+};
+
+export const draftDailyPlan = async (priorities: string[], backlog: string[]): Promise<string> => {
+  if (!ai) return "Error: API Key not found.";
+
+  try {
+    const response: GenerateContentResponse = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `Create a schedule for tomorrow.
+      
+      Priorities: ${priorities.join(', ')}
+      Backlog Tasks: ${backlog.join(', ')}
+      
+      Output a simple text schedule (e.g., "08:00 AM - Task").`,
+    });
+    return response.text || "Planning failed.";
+  } catch (error) {
+    console.error("Gemini API Error:", error);
+    return "Planning Offline.";
   }
 };
 
@@ -48,14 +121,13 @@ export const getCareerAudit = async (): Promise<string> => {
   try {
     const response: GenerateContentResponse = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: `Analyze the career profile of Michael Tran. 
-      Current Status: Studying for NABCEP PV Associate (15% complete).
-      Target: Solar Project Manager ($137k/yr) by Aug 2026.
+      contents: `Analyze the career profile. 
+      Current Status: Studying for NABCEP PV Associate.
+      Target: Project Manager.
       
       Identify 5 specific, high-impact "Improvement Actions" or "Speed Hacks" to accelerate this timeline. 
-      Focus on high-leverage activities (e.g., specific software to learn like Helioscope/PVSyst, networking strategies, specific hands-on skills).
       
-      Format the output as a clean, bulleted list with a bold title for each point, followed by a brief explanation.`,
+      Format the output as a clean, bulleted list with a bold title for each point.`,
     });
     return response.text || "No audit generated.";
   } catch (error) {
@@ -70,20 +142,16 @@ export const analyzeReflection = async (entry: string, type: 'Morning Plan' | 'E
   try {
     const response: GenerateContentResponse = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: `You are the "Accountability Mirror" AI. Your persona is a mix of David Goggins (Mental Toughness) and Elon Musk (First Principles Thinking).
+      contents: `You are the "Accountability Mirror" AI.
       
       The user has submitted a ${type}: "${entry}"
       
       Your Task:
       1. Analyze the entry for weakness, excuses, or redundancy.
       2. Provide 3 bullet points of highly specific, actionable feedback.
-      3. **CRITICAL REQUIREMENT**: You MUST reference specific principles in your advice.
-         - Instead of "work harder", say: "Apply the **40% Rule**. You hit a wall? You're only 40% done. The rest is mental. Push."
-         - Instead of "be smarter", say: "Use **First Principles**. Boil this problem down to its physics. What is the fundamental constraint?"
-         - Instead of "be honest", say: "Look in the **Accountability Mirror**. Stop lying to yourself about the effort."
-         - Instead of "keep going", say: "Reach into the **Cookie Jar**. Remember when you passed the last module? Use that fuel."
+      3. Reference principles like the 40% Rule or First Principles.
       
-      Tone: Ruthless, precise, no fluff. Do not be "encouraging" in a soft way. Be effective.`,
+      Tone: Ruthless, precise, no fluff.`,
     });
     return response.text || "No feedback generated.";
   } catch (error) {
@@ -98,16 +166,16 @@ export const getDeepDiveContent = async (strategy: string): Promise<string> => {
   try {
     const response: GenerateContentResponse = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: `You are an Elite Performance Coach specializing in the methods of David Goggins and Elon Musk.
+      contents: `You are an Elite Performance Coach.
       
-      The user requested a Deep Dive into the strategy: "${strategy}".
+      The user requested a Deep Dive into: "${strategy}".
       
-      Structure your response exactly like this:
-      1. **The Concept**: A powerful, no-nonsense definition of what this strategy is.
-      2. **Solar Career Application**: How specifically does this apply to studying for NABCEP exams or managing complex solar construction projects?
-      3. **The Drill**: A specific, immediate 5-minute exercise the user can do RIGHT NOW to apply this.
+      Structure your response:
+      1. **The Concept**: Definition.
+      2. **Career Application**: How it applies to professional growth.
+      3. **The Drill**: A specific, immediate 5-minute exercise.
       
-      Tone: Intense, authoritative, and highly motivating.`,
+      Tone: Intense, authoritative.`,
     });
     return response.text || "No content generated.";
   } catch (error) {
@@ -127,7 +195,7 @@ export const getTacticalAdvice = async (phase: string, completed: string[], pend
       Tasks Completed: ${completed.join(', ')}
       Tasks Remaining: ${pending.join(', ')}
       
-      Give me 2 sentences of high-intensity advice to finish the remaining tasks. If everything is done, congratulate me like a drill instructor.`,
+      Give me 2 sentences of high-intensity advice.`,
     });
     return response.text || "No advice generated.";
   } catch (error) {
@@ -142,16 +210,11 @@ export const draftInvestorUpdate = async (topic: string, context: string): Promi
   try {
     const response: GenerateContentResponse = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: `You are Michael Tran's Investor Relations AI Assistant. Write a professional, confident email update to investors.
+      contents: `Write a professional, confident email update to stakeholders.
       
       Topic: ${topic}
       Context: ${context}
-      Tone: Professional, transparent, high-energy, results-oriented.
-      
-      Format:
-      Subject: [Subject Line]
-      
-      [Body of the email]`,
+      Tone: Professional, transparent, high-energy, results-oriented.`,
     });
     return response.text || "No draft generated.";
   } catch (error) {
@@ -168,18 +231,18 @@ export const analyzeFinancialHealth = async (expenses: any[], income: number): P
   try {
     const response: GenerateContentResponse = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: `You are a ruthless Startup CFO advising a founder.
+      contents: `You are a Startup CFO.
       
-      Monthly Burn Rate: $${expenses.reduce((sum, e) => sum + e.amount, 0)}
-      Current Cash/Income: $${income}
+      Monthly Burn: $${expenses.reduce((sum, e) => sum + e.amount, 0)}
+      Cash: $${income}
       Expense List: ${JSON.stringify(expenses)}
       
       Task:
-      1. Calculate Runway (Months of survival).
-      2. Identify 2 specific "Fat Cutting" actions to extend runway. Be aggressive.
-      3. Suggest 1 revenue/grant strategy based on Solar Industry trends.
+      1. Calculate Runway.
+      2. Identify 2 "Fat Cutting" actions.
+      3. Suggest 1 revenue strategy.
       
-      Tone: Direct, financial, strategic.`,
+      Output valid JSON: { "healthScore": 80, "runwayMonths": 5, "burnDownData": [], "savingsTable": [], "actionPlan": [], "summary": "" }`,
     });
     return response.text || "Analysis failed.";
   } catch (error) {
@@ -194,16 +257,8 @@ export const negotiateBill = async (provider: string, amount: number, serviceTyp
   try {
     const response: GenerateContentResponse = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: `Write a script for me to call ${provider} and negotiate my ${serviceType} bill (currently $${amount}).
-      
-      Strategies to use:
-      1. Mention competitor offers.
-      2. Ask for "retention offers".
-      3. Be polite but firm about cancelling if rate isn't lowered.
-      
-      Output Format:
-      "Agent: [Likely response]"
-      "You: [Exact script to say]"`,
+      contents: `Write a negotiation script for ${provider} (${serviceType}, $${amount}).
+      Strategies: Competitor offers, retention offers.`,
     });
     return response.text || "Script generation failed.";
   } catch (error) {
@@ -226,26 +281,14 @@ export const analyzeBankStatement = async (base64Data: string, mimeType: string 
           }
         },
         {
-          text: `Analyze this bank statement for "Minimal Living Expenses" (MLE).
-          
-          1. Identify recurring monthly commitments (Rent, Insurance, Utilities, Car Note, Subscriptions).
-          2. Ignore one-off purchases (Dining out, shopping) unless they look like a habit.
-          3. Suggest a budget optimization strategy.
-          
-          Also, generate a JSON-like list of extracted expenses at the end of your response in this format:
-          [EXPENSE_START]
-          [
-            { "name": "Example Rent", "amount": 1200, "category": "Housing", "frequency": "Monthly", "isEssential": true },
-            ...
-          ]
-          [EXPENSE_END]`
+          text: `Analyze this bank statement for expenses.
+          Return JSON list in format: [EXPENSE_START][ ...json... ][EXPENSE_END]`
         }
       ]
     });
 
     const rawText = response.text || "";
     
-    // Extract JSON part
     let suggestedExpenses = [];
     const jsonMatch = rawText.match(/\[EXPENSE_START\]([\s\S]*?)\[EXPENSE_END\]/);
     if (jsonMatch && jsonMatch[1]) {
@@ -255,13 +298,11 @@ export const analyzeBankStatement = async (base64Data: string, mimeType: string 
         console.error("Failed to parse expense JSON", e);
       }
     }
-
-    // Clean text for display
     const displayText = rawText.replace(/\[EXPENSE_START\][\s\S]*?\[EXPENSE_END\]/, '').trim();
 
     return { text: displayText, suggestedExpenses };
   } catch (error) {
     console.error("Gemini API Error:", error);
-    return { text: "Failed to analyze document. Please ensure it is a valid PDF or Image.", suggestedExpenses: [] };
+    return { text: "Failed to analyze document.", suggestedExpenses: [] };
   }
 };

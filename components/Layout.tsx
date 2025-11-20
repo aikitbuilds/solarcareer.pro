@@ -179,7 +179,7 @@ export const Layout: React.FC<Props> = ({ children, activePage, onNavigate }) =>
                    <Cloud size={20} />
                 </div>
                 <div className="flex-1">
-                   <span className="text-sm font-bold text-slate-700 block group-hover:text-purple-700">SolarDrive</span>
+                   <span className="text-sm font-bold text-slate-700 block group-hover:text-purple-700">365Transform</span>
                    <span className="text-[10px] text-slate-400">External Sync Active</span>
                 </div>
                 <ExternalLink size={14} className="text-slate-300 group-hover:text-purple-400" />

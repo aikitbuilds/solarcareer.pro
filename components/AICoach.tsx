@@ -1,8 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { askSolarCoach, getCareerAudit, analyzeReflection, getTacticalAdvice, getDeepDiveContent } from '../services/geminiService';
-import { Bot, Send, Loader2, Sparkles, ListChecks, MessageSquare, Zap, BrainCircuit, Flame, Sun, Moon, Briefcase, CheckSquare, Timer, ChevronRight, BookOpen, Battery, Disc, UserCheck, ArrowRight } from 'lucide-react';
+import { askSolarCoach, analyzeReflection, getTacticalAdvice, getDeepDiveContent, researchCareerTopic } from '../services/geminiService';
+import { Bot, Send, Loader2, Sparkles, ListChecks, MessageSquare, Zap, BrainCircuit, Flame, Sun, Moon, Briefcase, CheckSquare, Timer, ChevronRight, BookOpen, Battery, Disc, UserCheck, ArrowRight, Search, Globe, FileText, BarChart3, Activity, ExternalLink } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
+import { ResearchResult } from '../types';
+import { ResponsiveContainer, RadialBarChart, RadialBar, BarChart, Bar, AreaChart, Area, Tooltip, XAxis } from 'recharts';
 
 interface Props {
   onNavigate?: (page: string) => void;
@@ -12,6 +14,7 @@ interface Props {
 export const AICoach: React.FC<Props> = ({ onNavigate, onAction }) => {
   const { data, updateData } = useData();
   const [activePhase, setActivePhase] = useState<'Morning' | 'Training' | 'Evening'>('Morning');
+  const [mode, setMode] = useState<'coach' | 'research'>('coach');
   
   // Use Global Data
   const tasks = data.routineTasks;
@@ -26,14 +29,32 @@ export const AICoach: React.FC<Props> = ({ onNavigate, onAction }) => {
   const [query, setQuery] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
 
-  // Reflection State
-  const [reflectionText, setReflectionText] = useState('');
+  // Research State
+  const [researchQuery, setResearchQuery] = useState('');
+  const [researchResult, setResearchResult] = useState<ResearchResult | null>(null);
 
   // Metrics
   const phaseTasks = tasks.filter(t => t.category === activePhase);
-  const completedCount = tasks.filter(t => t.completed).length;
+  const completedCount = tasks.filter(t => t.status === 'Done' || t.completed).length;
   const totalTasks = tasks.length;
   const savageScore = Math.round((completedCount / totalTasks) * 100);
+
+  // --- CHART DATA ---
+  const scoreData = [{ name: 'Score', value: savageScore, fill: '#F59E0B' }];
+  
+  const protocolData = [
+      { name: 'Morn', value: tasks.filter(t => t.category === 'Morning' && (t.status === 'Done' || t.completed)).length, total: tasks.filter(t => t.category === 'Morning').length },
+      { name: 'Train', value: tasks.filter(t => t.category === 'Training' && (t.status === 'Done' || t.completed)).length, total: tasks.filter(t => t.category === 'Training').length },
+      { name: 'Eve', value: tasks.filter(t => t.category === 'Evening' && (t.status === 'Done' || t.completed)).length, total: tasks.filter(t => t.category === 'Evening').length },
+  ];
+
+  const focusHistoryData = [
+      { time: '8am', mins: 0 },
+      { time: '10am', mins: 45 },
+      { time: '12pm', mins: 30 },
+      { time: '2pm', mins: 60 },
+      { time: '4pm', mins: 15 },
+  ];
 
   useEffect(() => {
     let interval: any;
@@ -50,7 +71,7 @@ export const AICoach: React.FC<Props> = ({ onNavigate, onAction }) => {
   };
 
   const toggleTask = (id: string) => {
-    const updatedTasks = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
+    const updatedTasks = tasks.map(t => t.id === id ? { ...t, status: t.status === 'Done' ? 'Todo' : 'Done', completed: !t.completed } : t);
     updateData({ routineTasks: updatedTasks });
   };
 
@@ -70,37 +91,11 @@ export const AICoach: React.FC<Props> = ({ onNavigate, onAction }) => {
 
   const handleTacticalCheck = async () => {
     setAiLoading(true);
-    const done = phaseTasks.filter(t => t.completed).map(t => t.label);
-    const pending = phaseTasks.filter(t => !t.completed).map(t => t.label);
+    const done = phaseTasks.filter(t => t.completed).map(t => t.title);
+    const pending = phaseTasks.filter(t => !t.completed).map(t => t.title);
     const advice = await getTacticalAdvice(activePhase, done, pending);
     
     setChatHistory(prev => [...prev, { sender: 'ai', text: advice }]);
-    setAiLoading(false);
-  };
-
-  const handleReflection = async () => {
-    if (!reflectionText) return;
-    setAiLoading(true);
-    const type = activePhase === 'Morning' ? 'Morning Plan' : 'Evening Review';
-    const feedback = await analyzeReflection(reflectionText, type);
-    
-    // Save to DB
-    const newEntry = {
-        id: Date.now().toString(),
-        date: new Date().toISOString(),
-        type: type as any,
-        content: reflectionText,
-        mood: 'Neutral' as any,
-        aiFeedback: feedback
-    };
-    updateData({ journal: [...data.journal, newEntry] });
-
-    setChatHistory(prev => [
-      ...prev, 
-      { sender: 'user', text: `[${activePhase} Reflection Logged]: ${reflectionText}` },
-      { sender: 'ai', text: feedback }
-    ]);
-    setReflectionText('');
     setAiLoading(false);
   };
 
@@ -109,6 +104,19 @@ export const AICoach: React.FC<Props> = ({ onNavigate, onAction }) => {
     setChatHistory(prev => [...prev, { sender: 'user', text: `Requesting Deep Dive: ${strategy}` }]);
     const content = await getDeepDiveContent(strategy);
     setChatHistory(prev => [...prev, { sender: 'ai', text: content }]);
+    setAiLoading(false);
+  };
+
+  const handleResearch = async () => {
+    if(!researchQuery) return;
+    setAiLoading(true);
+    const resStr = await researchCareerTopic(researchQuery);
+    try {
+      const parsed = JSON.parse(resStr);
+      setResearchResult(parsed);
+    } catch(e) {
+      setChatHistory(prev => [...prev, { sender: 'ai', text: "Research format error. Try again." }]);
+    }
     setAiLoading(false);
   };
 
@@ -127,21 +135,60 @@ export const AICoach: React.FC<Props> = ({ onNavigate, onAction }) => {
       {/* LEFT PANEL: ROUTINE & TRACKING */}
       <div className="flex-1 flex flex-col gap-4 h-full overflow-y-auto">
         
-        {/* Top Stats Bar */}
-        <div className="bg-slate-900 text-white p-4 rounded-xl shadow-lg flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center font-bold text-xl shadow-red-500/50 shadow-lg">
-              {isNaN(savageScore) ? 0 : savageScore}%
+        {/* --- MINI DASHBOARD --- */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
+             {/* Chart 1: Savage Score */}
+             <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col relative h-36">
+                <h3 className="font-bold text-slate-800 flex items-center gap-2 text-xs uppercase tracking-wide absolute top-3 left-3">
+                    <Flame className="w-3 h-3 text-red-500" /> Savage Score
+                </h3>
+                <div className="flex-1 w-full relative mt-2">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <RadialBarChart innerRadius="70%" outerRadius="100%" data={scoreData} startAngle={180} endAngle={0} barSize={15}>
+                            <RadialBar label={{ position: 'insideStart', fill: '#fff' }} background dataKey="value" cornerRadius={10} />
+                        </RadialBarChart>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center mt-6">
+                        <span className="text-2xl font-bold text-slate-800">{savageScore}%</span>
+                    </div>
+                </div>
             </div>
-            <div>
-              <div className="text-xs text-slate-400 uppercase tracking-wider font-bold">Savage Score</div>
-              <div className="font-bold text-lg">{completedCount}/{totalTasks} Tasks</div>
+
+            {/* Chart 2: Protocol Adherence */}
+            <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col h-36">
+                <h3 className="font-bold text-slate-800 mb-2 flex items-center gap-2 text-xs uppercase tracking-wide">
+                    <ListChecks className="w-3 h-3 text-blue-500" /> Protocol
+                </h3>
+                <div className="flex-1 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={protocolData}>
+                            <Tooltip cursor={{fill: 'transparent'}} contentStyle={{fontSize: '10px', borderRadius: '4px'}} />
+                            <Bar dataKey="value" fill="#3B82F6" radius={[2, 2, 0, 0]} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
             </div>
-          </div>
-          <div className="text-right">
-             <div className="text-xs text-slate-400 uppercase tracking-wider font-bold">Current Phase</div>
-             <div className="font-bold text-xl text-electric-400">{activePhase} Protocol</div>
-          </div>
+
+            {/* Chart 3: Focus Intensity */}
+            <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col h-36">
+                <h3 className="font-bold text-slate-800 mb-2 flex items-center gap-2 text-xs uppercase tracking-wide">
+                    <Activity className="w-3 h-3 text-green-500" /> Focus Flow
+                </h3>
+                <div className="flex-1 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={focusHistoryData}>
+                            <defs>
+                                <linearGradient id="colorFocus" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
+                                    <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                                </linearGradient>
+                            </defs>
+                            <Tooltip contentStyle={{fontSize: '10px', borderRadius: '4px'}} />
+                            <Area type="monotone" dataKey="mins" stroke="#10B981" fillOpacity={1} fill="url(#colorFocus)" strokeWidth={2} />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </div>
+            </div>
         </div>
 
         {/* Phase Selector */}
@@ -209,13 +256,13 @@ export const AICoach: React.FC<Props> = ({ onNavigate, onAction }) => {
                <div 
                 key={task.id} 
                 onClick={() => toggleTask(task.id)}
-                className={`p-4 rounded-xl border-2 cursor-pointer transition flex items-center gap-4 group ${task.completed ? 'border-green-500 bg-green-50' : 'border-slate-100 hover:border-electric-300'}`}
+                className={`p-4 rounded-xl border-2 cursor-pointer transition flex items-center gap-4 group ${task.status === 'Done' ? 'border-green-500 bg-green-50' : 'border-slate-100 hover:border-electric-300'}`}
                >
-                 <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition ${task.completed ? 'bg-green-500 border-green-500' : 'border-slate-300 group-hover:border-electric-400'}`}>
-                    {task.completed && <CheckSquare className="w-4 h-4 text-white" />}
+                 <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition ${task.status === 'Done' ? 'bg-green-500 border-green-500' : 'border-slate-300 group-hover:border-electric-400'}`}>
+                    {task.status === 'Done' && <CheckSquare className="w-4 h-4 text-white" />}
                  </div>
                  <div className="flex-1">
-                    <div className={`font-bold ${task.completed ? 'text-green-800 line-through opacity-70' : 'text-slate-700'}`}>{task.label}</div>
+                    <div className={`font-bold ${task.status === 'Done' ? 'text-green-800 line-through opacity-70' : 'text-slate-700'}`}>{task.title}</div>
                     {task.timeEstimate && <div className="text-xs text-slate-400 font-mono">{task.timeEstimate}</div>}
                  </div>
                </div>
@@ -250,95 +297,155 @@ export const AICoach: React.FC<Props> = ({ onNavigate, onAction }) => {
                </div>
              </div>
            )}
-
-           {(activePhase === 'Morning' || activePhase === 'Evening') && (
-             <div className="border-t border-slate-100 pt-6">
-               <h4 className="font-bold text-slate-800 mb-3 flex items-center gap-2">
-                 <BrainCircuit className="w-5 h-5 text-purple-600" />
-                 {activePhase === 'Morning' ? 'Morning Intention' : 'After Action Report'}
-               </h4>
-               <textarea
-                  value={reflectionText}
-                  onChange={(e) => setReflectionText(e.target.value)}
-                  className="w-full h-24 bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-electric-50 outline-none resize-none"
-                  placeholder={activePhase === 'Morning' ? "What is the ONE thing you must accomplish?" : "Where did you fail today? No excuses."}
-               />
-               <button 
-                onClick={handleReflection}
-                disabled={!reflectionText}
-                className="mt-3 w-full bg-purple-600 hover:bg-purple-700 disabled:bg-slate-300 text-white py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition"
-               >
-                 <Sparkles className="w-4 h-4" /> Analyze & Commit
-               </button>
-             </div>
-           )}
         </div>
       </div>
 
-      {/* RIGHT PANEL: AI CHAT & FEEDBACK (Always visible now) */}
+      {/* RIGHT PANEL: AI & RESEARCH */}
       <div className="w-full lg:w-96 bg-white border-l border-slate-200 flex flex-col h-full shadow-xl z-10">
-        <div className="p-4 bg-slate-50 border-b border-slate-200 flex flex-col gap-3">
-          <div className="flex items-center gap-2">
-            <Bot className="w-5 h-5 text-electric-600" />
-            <span className="font-bold text-slate-700">AI Coach Uplink</span>
-            <div className="ml-auto w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-          </div>
-          
-          {/* Mindset Protocol Toolbar */}
-          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-             <button onClick={() => handleDeepDive('Accountability Mirror')} className="shrink-0 px-2 py-1 bg-white border border-slate-200 hover:border-purple-400 hover:bg-purple-50 rounded text-[10px] font-bold flex items-center gap-1 text-slate-600 transition" title="Goggins: Self-Reflection">
-               <UserCheck className="w-3 h-3 text-purple-500" /> Mirror
-             </button>
-             <button onClick={() => handleDeepDive('40% Rule')} className="shrink-0 px-2 py-1 bg-white border border-slate-200 hover:border-red-400 hover:bg-red-50 rounded text-[10px] font-bold flex items-center gap-1 text-slate-600 transition" title="Goggins: Endurance">
-               <Battery className="w-3 h-3 text-red-500" /> 40% Rule
-             </button>
-             <button onClick={() => handleDeepDive('First Principles')} className="shrink-0 px-2 py-1 bg-white border border-slate-200 hover:border-blue-400 hover:bg-blue-50 rounded text-[10px] font-bold flex items-center gap-1 text-slate-600 transition" title="Musk: Physics Thinking">
-               <BrainCircuit className="w-3 h-3 text-blue-500" /> 1st Princ.
-             </button>
-             <button onClick={() => handleDeepDive('Cookie Jar')} className="shrink-0 px-2 py-1 bg-white border border-slate-200 hover:border-orange-400 hover:bg-orange-50 rounded text-[10px] font-bold flex items-center gap-1 text-slate-600 transition" title="Goggins: Past Wins">
-               <Disc className="w-3 h-3 text-orange-500" /> Cookie Jar
-             </button>
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50">
-          {chatHistory.map((msg, idx) => (
-            <div key={idx} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[90%] p-3 rounded-xl text-sm whitespace-pre-wrap ${msg.sender === 'user' ? 'bg-electric-600 text-white rounded-br-none' : 'bg-white border border-slate-200 text-slate-700 rounded-bl-none shadow-sm'}`}>
-                {msg.text}
-              </div>
-            </div>
-          ))}
-          {aiLoading && (
-            <div className="flex justify-start">
-              <div className="bg-white border border-slate-200 p-3 rounded-xl rounded-bl-none shadow-sm flex items-center gap-2 text-slate-500 text-sm">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Coach is thinking...</span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <form onSubmit={handleSendMessage} className="p-4 bg-white border-t border-slate-200">
-          <div className="relative">
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Ask for advice or log status..."
-              className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-electric-50 outline-none transition"
-            />
+        {/* Tabs */}
+        <div className="flex border-b border-slate-200">
             <button 
-              type="submit" 
-              disabled={!query.trim() || aiLoading}
-              className="absolute right-2 top-2 p-1.5 bg-electric-600 text-white rounded-lg hover:bg-electric-700 disabled:opacity-50 transition"
+              onClick={() => setMode('coach')}
+              className={`flex-1 py-3 text-sm font-bold transition ${mode === 'coach' ? 'border-b-2 border-electric-600 text-electric-700 bg-electric-50' : 'text-slate-500 hover:bg-slate-50'}`}
             >
-              <Send className="w-4 h-4" />
+                AI Coach
             </button>
-          </div>
-        </form>
-      </div>
+            <button 
+              onClick={() => setMode('research')}
+              className={`flex-1 py-3 text-sm font-bold transition ${mode === 'research' ? 'border-b-2 border-purple-600 text-purple-700 bg-purple-50' : 'text-slate-500 hover:bg-slate-50'}`}
+            >
+                Research
+            </button>
+        </div>
 
+        {mode === 'coach' ? (
+            <>
+                <div className="p-4 bg-slate-50 border-b border-slate-200 flex flex-col gap-3">
+                    <div className="flex items-center gap-2">
+                        <Bot className="w-5 h-5 text-electric-600" />
+                        <span className="font-bold text-slate-700">AI Coach Uplink</span>
+                        <div className="ml-auto w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    </div>
+                    
+                    {/* Mindset Protocol Toolbar */}
+                    <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+                        <button onClick={() => handleDeepDive('Accountability Mirror')} className="shrink-0 px-2 py-1 bg-white border border-slate-200 hover:border-purple-400 hover:bg-purple-50 rounded text-[10px] font-bold flex items-center gap-1 text-slate-600 transition" title="Goggins: Self-Reflection">
+                        <UserCheck className="w-3 h-3 text-purple-500" /> Mirror
+                        </button>
+                        <button onClick={() => handleDeepDive('40% Rule')} className="shrink-0 px-2 py-1 bg-white border border-slate-200 hover:border-red-400 hover:bg-red-50 rounded text-[10px] font-bold flex items-center gap-1 text-slate-600 transition" title="Goggins: Endurance">
+                        <Battery className="w-3 h-3 text-red-500" /> 40% Rule
+                        </button>
+                        <button onClick={() => handleDeepDive('First Principles')} className="shrink-0 px-2 py-1 bg-white border border-slate-200 hover:border-blue-400 hover:bg-blue-50 rounded text-[10px] font-bold flex items-center gap-1 text-slate-600 transition" title="Musk: Physics Thinking">
+                        <BrainCircuit className="w-3 h-3 text-blue-500" /> 1st Princ.
+                        </button>
+                        <button onClick={() => handleDeepDive('Cookie Jar')} className="shrink-0 px-2 py-1 bg-white border border-slate-200 hover:border-orange-400 hover:bg-orange-50 rounded text-[10px] font-bold flex items-center gap-1 text-slate-600 transition" title="Goggins: Past Wins">
+                        <Disc className="w-3 h-3 text-orange-500" /> Cookie Jar
+                        </button>
+                    </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50">
+                    {chatHistory.map((msg, idx) => (
+                        <div key={idx} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-[90%] p-3 rounded-xl text-sm whitespace-pre-wrap ${msg.sender === 'user' ? 'bg-electric-600 text-white rounded-br-none' : 'bg-white border border-slate-200 text-slate-700 rounded-bl-none shadow-sm'}`}>
+                            {msg.text}
+                        </div>
+                        </div>
+                    ))}
+                    {aiLoading && (
+                        <div className="flex justify-start">
+                        <div className="bg-white border border-slate-200 p-3 rounded-xl rounded-bl-none shadow-sm flex items-center gap-2 text-slate-500 text-sm">
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>Coach is thinking...</span>
+                        </div>
+                        </div>
+                    )}
+                </div>
+
+                <form onSubmit={handleSendMessage} className="p-4 bg-white border-t border-slate-200">
+                    <div className="relative">
+                        <input
+                        type="text"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="Ask for advice or log status..."
+                        className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-electric-50 outline-none transition"
+                        />
+                        <button 
+                        type="submit" 
+                        disabled={!query.trim() || aiLoading}
+                        className="absolute right-2 top-2 p-1.5 bg-electric-600 text-white rounded-lg hover:bg-electric-700 disabled:opacity-50 transition"
+                        >
+                        <Send className="w-4 h-4" />
+                        </button>
+                    </div>
+                </form>
+            </>
+        ) : (
+            <div className="flex flex-col h-full">
+                <div className="p-4 border-b border-slate-200 bg-purple-50">
+                    <h3 className="font-bold text-slate-700 mb-2 flex items-center gap-2">
+                        <Globe className="w-4 h-4 text-purple-600" /> Knowledge Gatherer
+                    </h3>
+                    <div className="flex gap-2">
+                        <input 
+                          type="text"
+                          value={researchQuery}
+                          onChange={(e) => setResearchQuery(e.target.value)}
+                          placeholder="Topic (e.g. PMP Certification)"
+                          className="flex-1 p-2 text-sm border border-slate-300 rounded-lg"
+                        />
+                        <button onClick={handleResearch} className="bg-purple-600 text-white p-2 rounded-lg">
+                            <Search className="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+                
+                <div className="flex-1 overflow-y-auto p-4 bg-slate-50">
+                    {researchResult ? (
+                        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-4">
+                            <h4 className="font-bold text-lg text-slate-800">{researchResult.topic}</h4>
+                            <p className="text-sm text-slate-600">{researchResult.summary}</p>
+                            
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="bg-slate-50 p-3 rounded border border-slate-100">
+                                    <div className="text-xs font-bold text-slate-400 uppercase">Cost</div>
+                                    <div className="font-mono text-sm font-bold text-slate-800">{researchResult.estimatedCost}</div>
+                                </div>
+                                <div className="bg-slate-50 p-3 rounded border border-slate-100">
+                                    <div className="text-xs font-bold text-slate-400 uppercase">Timeline</div>
+                                    <div className="font-mono text-sm font-bold text-slate-800">{researchResult.timeline}</div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h5 className="font-bold text-sm text-slate-700 mb-2">Prerequisites</h5>
+                                <ul className="list-disc list-inside text-xs text-slate-600">
+                                    {researchResult.prerequisites.map((p,i) => <li key={i}>{p}</li>)}
+                                </ul>
+                            </div>
+
+                             <div>
+                                <h5 className="font-bold text-sm text-slate-700 mb-2">Resources</h5>
+                                <div className="space-y-2">
+                                    {researchResult.resources.map((r,i) => (
+                                        <a key={i} href={r.url} target="_blank" className="block text-xs text-blue-600 hover:underline truncate">
+                                            <ExternalLink className="w-3 h-3 inline mr-1" /> {r.title}
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="text-center text-slate-400 mt-10">
+                            <Search className="w-12 h-12 mx-auto mb-2 opacity-20" />
+                            <p className="text-sm">Enter a topic to research.</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        )}
+      </div>
     </div>
   );
 };

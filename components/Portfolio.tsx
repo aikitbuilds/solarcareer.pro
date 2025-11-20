@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
-import { ExternalLink, Server, Cpu, BarChart3, Layout, Users, CheckCircle2, ArrowRight, Globe, Layers, Zap, Database, ChevronLeft, ChevronRight, RotateCw, ImageIcon } from 'lucide-react';
+import { ExternalLink, Layout, ArrowRight, Globe, Layers, Database, ChevronLeft, ChevronRight, RotateCw, BarChart3, Cpu, Zap, PieChart as PieIcon, Activity } from 'lucide-react';
+import { ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, Tooltip, AreaChart, Area, XAxis, CartesianGrid, YAxis } from 'recharts';
 
 interface Project {
   id: string;
@@ -15,7 +16,7 @@ interface Project {
   impact: string[];
   color: string;
   fallbackImage: string;
-  screenshotUrl?: string; // New optional field to force a specific image
+  screenshotUrl?: string;
 }
 
 export const Portfolio: React.FC = () => {
@@ -52,6 +53,7 @@ export const Portfolio: React.FC = () => {
         'Integrated real-time market data feeds'
       ],
       color: 'from-indigo-500 to-purple-600',
+      screenshotUrl: 'https://file-s3-assets.ai-studio-assets.com/s/321186602917504910/10x-better-deals-screenshot.png',
       fallbackImage: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2670&auto=format&fit=crop'
     },
     {
@@ -87,15 +89,35 @@ export const Portfolio: React.FC = () => {
         'Zero downtime during migration'
       ],
       color: 'from-yellow-500 to-orange-500',
-      // Internal tool might be behind login, so we force a high-quality dashboard screenshot here
       screenshotUrl: 'https://images.unsplash.com/photo-1556155092-490a1ba16284?q=80&w=2670&auto=format&fit=crop',
       fallbackImage: 'https://images.unsplash.com/photo-1661956602116-aa6865609028?q=80&w=2564&auto=format&fit=crop'
     }
   ];
 
+  // --- CHART DATA ---
+  const techData = [
+    { name: 'React/FE', value: 40, color: '#3B82F6' },
+    { name: 'Backend', value: 30, color: '#10B981' },
+    { name: 'AI/ML', value: 20, color: '#F59E0B' },
+    { name: 'DevOps', value: 10, color: '#8B5CF6' },
+  ];
+
+  const impactData = [
+    { name: 'Lead Gen', value: 381, fill: '#10B981' },
+    { name: 'Speed', value: 95, fill: '#3B82F6' }, // 95% faster
+    { name: 'Auto', value: 80, fill: '#F59E0B' }, // 80% automation
+  ];
+
+  const scaleData = [
+    { month: 'Jan', reqs: 1000 },
+    { month: 'Feb', reqs: 5000 },
+    { month: 'Mar', reqs: 12000 },
+    { month: 'Apr', reqs: 45000 },
+    { month: 'May', reqs: 120000 },
+  ];
+
   // Helper component to handle image loading errors
   const ProjectImage = ({ project }: { project: Project }) => {
-    // Use manual screenshot URL if provided, otherwise attempt dynamic generation
     const initialSrc = project.screenshotUrl 
       ? project.screenshotUrl 
       : `https://image.thum.io/get/width/1200/crop/750/noanimate/${project.url}`;
@@ -128,47 +150,95 @@ export const Portfolio: React.FC = () => {
   };
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="bg-slate-900 p-10 rounded-3xl shadow-2xl text-white relative overflow-hidden border border-slate-800">
-        {/* Background Elements */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-electric-500/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-solar-500/10 rounded-full blur-3xl -ml-10 -mb-10"></div>
-        
-        <div className="relative z-10 max-w-3xl">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm border border-white/10">
-              <Layers className="w-5 h-5 text-electric-400" />
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-2">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800">Engineering Portfolio</h2>
+          <p className="text-slate-500">Mission-critical digital infrastructure and AI systems.</p>
+        </div>
+      </div>
+
+      {/* --- MINI DASHBOARD --- */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        {/* Chart 1: Tech Ecology */}
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+             <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
+                <PieIcon className="w-4 h-4 text-electric-500" /> Tech Stack Mix
+            </h3>
+            <div className="h-32 w-full flex gap-4 items-center">
+                <div className="flex-1 h-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie data={techData} innerRadius={25} outerRadius={40} paddingAngle={5} dataKey="value">
+                                {techData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </div>
+                <div className="flex-1 space-y-1">
+                    {techData.map(d => (
+                        <div key={d.name} className="flex items-center gap-2 text-xs font-bold text-slate-600">
+                            <div className="w-2 h-2 rounded-full" style={{backgroundColor: d.color}}></div>
+                            {d.name}
+                        </div>
+                    ))}
+                </div>
             </div>
-            <span className="text-electric-400 text-sm font-bold uppercase tracking-wider">
-              Engineering Portfolio
-            </span>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-            Building the Digital Infrastructure of <span className="text-transparent bg-clip-text bg-gradient-to-r from-solar-400 to-electric-400">Solar Energy</span>
-          </h1>
-          <p className="text-slate-300 text-lg leading-relaxed mb-8">
-            Before seeking investment, I architected and deployed mission-critical systems for three major solar companies. These aren't just concepts—they are live platforms processing millions in revenue.
-          </p>
-          <div className="flex flex-wrap gap-4">
-            <div className="bg-slate-800/50 px-4 py-2 rounded-full border border-slate-700 flex items-center gap-2">
-              <Database className="w-4 h-4 text-green-400" />
-              <span className="text-sm font-medium">Full-Stack Architecture</span>
+        </div>
+
+        {/* Chart 2: Performance Impact */}
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+             <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
+                <BarChart3 className="w-4 h-4 text-green-500" /> System Impact
+            </h3>
+            <div className="h-32 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={impactData}>
+                        <Tooltip cursor={{fill: 'transparent'}} contentStyle={{fontSize: '12px', borderRadius: '8px'}} />
+                        <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={30}>
+                           {impactData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.fill} />
+                            ))}
+                        </Bar>
+                    </BarChart>
+                </ResponsiveContainer>
             </div>
-            <div className="bg-slate-800/50 px-4 py-2 rounded-full border border-slate-700 flex items-center gap-2">
-              <Zap className="w-4 h-4 text-yellow-400" />
-              <span className="text-sm font-medium">Automation & AI</span>
+            <div className="flex justify-center text-xs text-slate-500 mt-2 font-bold">
+                % Increase / Efficiency Gain
             </div>
-            <div className="bg-slate-800/50 px-4 py-2 rounded-full border border-slate-700 flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-blue-400" />
-              <span className="text-sm font-medium">Operational Analytics</span>
+        </div>
+
+        {/* Chart 3: Scale */}
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+             <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
+                <Activity className="w-4 h-4 text-purple-500" /> Scale Velocity
+            </h3>
+            <div className="h-32 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={scaleData}>
+                        <defs>
+                            <linearGradient id="colorScale" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.3}/>
+                                <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0}/>
+                            </linearGradient>
+                        </defs>
+                        <Tooltip contentStyle={{fontSize: '12px', borderRadius: '8px'}} />
+                        <Area type="monotone" dataKey="reqs" stroke="#8B5CF6" fillOpacity={1} fill="url(#colorScale)" strokeWidth={3} />
+                    </AreaChart>
+                </ResponsiveContainer>
             </div>
-          </div>
+             <div className="flex justify-center text-xs text-slate-500 mt-2 font-bold">
+                Data Points Processed
+            </div>
         </div>
       </div>
 
       {/* Projects List */}
-      <div className="space-y-32">
+      <div className="space-y-32 pt-6">
         {projects.map((project, index) => (
           <div key={project.id} className={`flex flex-col lg:flex-row gap-12 items-center ${index % 2 === 1 ? 'lg:flex-row-reverse' : ''}`}>
             
@@ -213,7 +283,7 @@ export const Portfolio: React.FC = () => {
                       </a>
                    </div>
 
-                   {/* Gradient Overlay (always visible slightly) */}
+                   {/* Gradient Overlay */}
                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent pointer-events-none"></div>
                    
                    {/* Bottom Label */}
@@ -252,7 +322,7 @@ export const Portfolio: React.FC = () => {
 
               <div>
                 <h4 className="font-bold text-slate-900 mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
-                  <CheckCircle2 className="w-4 h-4 text-green-500" /> Key Impact
+                  <Zap className="w-4 h-4 text-yellow-500" /> Key Impact
                 </h4>
                 <ul className="space-y-3">
                   {project.impact.map((item, i) => (

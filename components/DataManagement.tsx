@@ -159,20 +159,20 @@ export const DataManagement: React.FC = () => {
                 
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">SolarDrive URL</label>
+                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">365Transform URL</label>
                         <input 
                             type="text"
                             value={externalUrl}
                             onChange={(e) => setExternalUrl(e.target.value)}
                             className="w-full p-3 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-electric-500 outline-none"
-                            placeholder="https://ai.studio/apps/drive/..."
+                            placeholder="https://ai-powered-life-transformation..."
                         />
                     </div>
                     
                     <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg text-xs text-blue-800 flex gap-3">
                         <ExternalLink className="w-4 h-4 shrink-0 mt-0.5" />
                         <div>
-                            <strong>Quick Access:</strong> Saving this URL enables the "SolarDrive" shortcut in the main sidebar navigation.
+                            <strong>Quick Access:</strong> Saving this URL enables the "365Transform" shortcut in the main sidebar navigation.
                         </div>
                     </div>
                 </div>

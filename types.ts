@@ -93,6 +93,26 @@ export interface JournalEntry {
   aiFeedback?: string;
 }
 
+export interface WeeklyRecap {
+  id: string;
+  weekStartDate: string;
+  totalTasksCompleted: number;
+  averageMood: string;
+  keyWins: string[];
+  lessonsLearned: string[];
+  aiStrategyForNextWeek: string;
+  score: number; // 0-100
+}
+
+export interface ResearchResult {
+  topic: string;
+  summary: string;
+  prerequisites: string[];
+  estimatedCost: string;
+  timeline: string;
+  resources: { title: string; url: string }[];
+}
+
 export interface RoutineTask {
   id: string;
   title: string; // Renamed from label
@@ -173,6 +193,7 @@ export interface AppData {
   investorUpdates: InvestorUpdate[];
   routineTasks: RoutineTask[];
   journal: JournalEntry[];
+  weeklyRecaps: WeeklyRecap[]; // New field
   fieldLogs: FieldLog[];
   expenses: Expense[];
   syncSettings: SyncSettings;

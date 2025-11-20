@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { Certification, PhaseStatus, StudySession, StudyResource, FieldLog } from '../types';
 import { INITIAL_SESSIONS, STUDY_RESOURCES } from '../constants';
-import { CheckCircle2, Clock, Calendar, BookOpen, ExternalLink, AlertCircle, PlayCircle, FileText, Trophy, Plus, MapPin, Monitor, Cpu, Sun, Hammer, PencilRuler, LineChart, Wrench, Zap, Network, Loader2, Signal, DownloadCloud, WifiOff, X } from 'lucide-react';
-import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { CheckCircle2, Clock, Calendar, BookOpen, ExternalLink, AlertCircle, PlayCircle, FileText, Trophy, Plus, MapPin, Monitor, Cpu, Sun, Hammer, PencilRuler, LineChart, Wrench, Zap, Network, Loader2, Signal, DownloadCloud, WifiOff, X, BarChart3, PieChart as PieIcon, Activity } from 'lucide-react';
+import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, RadialBarChart, RadialBar } from 'recharts';
 import { useData } from '../contexts/DataContext';
 
 interface Props {
@@ -34,6 +34,24 @@ export const CertificationTracker: React.FC<Props> = ({ certifications: initialC
   // Field Log State
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
+
+  // --- MINI DASHBOARD DATA ---
+  const studyVelocityData = [
+    { day: 'Mon', hours: 2 },
+    { day: 'Tue', hours: 1.5 },
+    { day: 'Wed', hours: 3 },
+    { day: 'Thu', hours: 0 },
+    { day: 'Fri', hours: 2.5 },
+    { day: 'Sat', hours: 4 },
+    { day: 'Sun', hours: 1 },
+  ];
+
+  const readinessData = [
+    { name: 'Ready', value: 65, fill: '#3B82F6' }
+  ];
+
+  const scoreTrendData = examScores.slice(-5).map((s, i) => ({ ...s, index: i })) || [];
+
 
   // Handle Initial Actions from other pages (e.g. AI Coach)
   useEffect(() => {
@@ -279,12 +297,72 @@ export const CertificationTracker: React.FC<Props> = ({ certifications: initialC
       )}
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-2">
         <div>
           <h2 className="text-2xl font-bold text-slate-800">Certification & Skills</h2>
           <p className="text-slate-500">Manage your NABCEP journey from prep to pro.</p>
         </div>
-        <div className="flex bg-slate-200 p-1 rounded-lg mt-4 md:mt-0 overflow-x-auto">
+      </div>
+
+      {/* --- MINI DASHBOARD --- */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        {/* Chart 1: Study Velocity */}
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+             <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
+                <BarChart3 className="w-4 h-4 text-electric-500" /> Study Velocity (7 Days)
+            </h3>
+            <div className="h-32 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={studyVelocityData}>
+                        <Tooltip cursor={{fill: 'transparent'}} contentStyle={{fontSize: '12px', borderRadius: '8px'}} />
+                        <Bar dataKey="hours" fill="#3B82F6" radius={[4, 4, 0, 0]} barSize={30} />
+                    </BarChart>
+                </ResponsiveContainer>
+            </div>
+            <div className="flex justify-between text-xs text-slate-500 mt-2 font-bold">
+                <span>Total: 14hrs</span>
+                <span className="text-electric-600">Target: 10hrs/wk</span>
+            </div>
+        </div>
+
+        {/* Chart 2: Readiness */}
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col relative">
+             <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
+                <Activity className="w-4 h-4 text-green-500" /> Exam Readiness
+            </h3>
+            <div className="h-32 w-full relative">
+                <ResponsiveContainer width="100%" height="100%">
+                    <RadialBarChart innerRadius="80%" outerRadius="100%" data={readinessData} startAngle={180} endAngle={0} barSize={20}>
+                        <RadialBar label={{ position: 'insideStart', fill: '#fff' }} background dataKey="value" cornerRadius={10} />
+                    </RadialBarChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex flex-col items-center justify-center mt-8">
+                    <span className="text-3xl font-bold text-slate-800">65%</span>
+                    <span className="text-[10px] text-slate-400 uppercase">Confidence</span>
+                </div>
+            </div>
+        </div>
+
+        {/* Chart 3: Knowledge Gaps */}
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+             <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
+                <PieIcon className="w-4 h-4 text-purple-500" /> Recent Scores Trend
+            </h3>
+            <div className="h-32 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                     <RechartsLineChart data={scoreTrendData}>
+                        <Tooltip contentStyle={{fontSize: '12px', borderRadius: '8px'}} />
+                        <Line type="monotone" dataKey="score" stroke="#8B5CF6" strokeWidth={3} dot={{r:3}} />
+                    </RechartsLineChart>
+                </ResponsiveContainer>
+            </div>
+             <div className="flex justify-center text-xs text-slate-500 mt-2 font-bold">
+                Last 5 Practice Exams
+            </div>
+        </div>
+      </div>
+
+      <div className="flex bg-slate-200 p-1 rounded-lg mt-4 md:mt-0 overflow-x-auto w-full md:w-fit mb-6">
           <button 
             onClick={() => setActiveTab('active')}
             className={`px-3 py-2 text-sm font-medium rounded-md transition whitespace-nowrap ${activeTab === 'active' ? 'bg-white text-electric-600 shadow' : 'text-slate-600 hover:text-slate-900'}`}
@@ -316,7 +394,6 @@ export const CertificationTracker: React.FC<Props> = ({ certifications: initialC
             Labs & Resources
           </button>
         </div>
-      </div>
 
       {/* Tab Content */}
       {activeTab === 'active' && activeCert && (
@@ -338,12 +415,19 @@ export const CertificationTracker: React.FC<Props> = ({ certifications: initialC
                 </div>
               </div>
 
+              <div className="flex justify-between items-end mb-2 relative z-10">
+                <span className="text-xs font-bold text-slate-500 uppercase">Progress Tracker</span>
+                <span className="text-xs font-bold text-electric-600">{activeCert.completedHours} / {activeCert.totalHours} Hrs</span>
+              </div>
               {/* Progress Bar */}
-              <div className="w-full bg-slate-100 rounded-full h-4 mb-6">
+              <div className="w-full bg-slate-100 rounded-full h-6 mb-6 p-1 border border-slate-200 relative z-10">
                 <div 
-                  className="bg-gradient-to-r from-solar-500 to-electric-500 h-4 rounded-full transition-all duration-500" 
+                  className="bg-gradient-to-r from-solar-500 to-electric-500 h-full rounded-full transition-all duration-1000 relative shadow-sm overflow-hidden" 
                   style={{ width: `${activeCert.progress}%` }}
-                ></div>
+                >
+                   <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                   <div className="absolute right-1 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-white rounded-full shadow-sm"></div>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">

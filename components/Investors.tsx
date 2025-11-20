@@ -1,9 +1,10 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Investor, InvestorUpdate } from '../types';
-import { Users, Send, Plus, DollarSign, PieChart, TrendingUp, Mail, CheckCircle2, Sparkles, Loader2, Save, X, Calendar, Filter, Eye, Bold, Italic, Underline, List, AlignLeft } from 'lucide-react';
+import { Users, Send, Plus, DollarSign, PieChart, TrendingUp, Mail, CheckCircle2, Sparkles, Loader2, Save, X, Calendar, Filter, Eye, Bold, Italic, Underline, List, AlignLeft, BarChart3, PieChart as PieChartIcon, AreaChart as AreaIcon } from 'lucide-react';
 import { draftInvestorUpdate } from '../services/geminiService';
 import { useData } from '../contexts/DataContext';
+import { ResponsiveContainer, PieChart as RechartsPie, Pie, Cell, BarChart, Bar, XAxis, Tooltip, AreaChart, Area, CartesianGrid } from 'recharts';
 
 export const Investors: React.FC = () => {
   const { data, updateData } = useData();
@@ -36,6 +37,30 @@ export const Investors: React.FC = () => {
   const totalRaised = investors.filter(i => i.status === 'Wired' || i.status === 'Committed').reduce((sum, i) => sum + i.amount, 0);
   const goal = 30000;
   const progress = (totalRaised / goal) * 100;
+
+  // --- CHART DATA ---
+  // 1. Capital Stack
+  const capitalStackData = [
+    { name: 'Equity', value: investors.filter(i => i.type === 'Equity').length, color: '#3B82F6' },
+    { name: 'Loan', value: investors.filter(i => i.type === 'Loan').length, color: '#8B5CF6' },
+    { name: 'Grant', value: investors.filter(i => i.type === 'Grant').length, color: '#10B981' },
+  ];
+
+  // 2. Pipeline
+  const pipelineData = [
+    { status: 'Prospect', count: investors.filter(i => i.status === 'Prospect').length },
+    { status: 'Contacted', count: investors.filter(i => i.status === 'Contacted').length },
+    { status: 'Committed', count: investors.filter(i => i.status === 'Committed').length },
+    { status: 'Wired', count: investors.filter(i => i.status === 'Wired').length },
+  ];
+
+  // 3. Cumulative Funds (Simulated)
+  const fundsData = [
+    { month: 'Aug', amount: 0 },
+    { month: 'Sep', amount: 5000 },
+    { month: 'Oct', amount: 15000 },
+    { month: 'Nov', amount: totalRaised },
+  ];
 
   // Populate editor when tab opens
   useEffect(() => {
@@ -134,7 +159,93 @@ export const Investors: React.FC = () => {
           <h2 className="text-2xl font-bold text-slate-800">Investor Relations</h2>
           <p className="text-slate-500">Capital management and stakeholder communication portal.</p>
         </div>
-        <div className="flex bg-slate-200 p-1 rounded-lg mt-4 md:mt-0">
+      </div>
+
+      {/* SUCCESS TOAST */}
+      {showSuccess && (
+        <div className="absolute top-0 left-0 right-0 mx-auto w-full max-w-md bg-green-600 text-white p-4 rounded-xl shadow-2xl z-50 animate-bounce flex items-center gap-3 justify-center">
+          <CheckCircle2 className="w-6 h-6" />
+          <div className="font-bold">Update Sent Successfully!</div>
+        </div>
+      )}
+
+      {/* --- MINI DASHBOARD --- */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Chart 1: Capital Stack */}
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+            <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
+                <PieChartIcon className="w-4 h-4 text-electric-500" /> Capital Mix
+            </h3>
+            <div className="h-32 w-full flex gap-4 items-center">
+                <div className="flex-1 h-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <RechartsPie>
+                            <Pie data={capitalStackData} innerRadius={25} outerRadius={40} paddingAngle={5} dataKey="value">
+                                {capitalStackData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                        </RechartsPie>
+                    </ResponsiveContainer>
+                </div>
+                <div className="flex-1 space-y-1">
+                    {capitalStackData.map(d => (
+                        <div key={d.name} className="flex items-center gap-2 text-xs font-bold text-slate-600">
+                            <div className="w-2 h-2 rounded-full" style={{backgroundColor: d.color}}></div>
+                            {d.name} ({d.value})
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+
+        {/* Chart 2: Pipeline Velocity */}
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+             <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
+                <BarChart3 className="w-4 h-4 text-slate-500" /> Pipeline Status
+            </h3>
+            <div className="h-32 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={pipelineData}>
+                        <Tooltip cursor={{fill: 'transparent'}} contentStyle={{fontSize: '12px', borderRadius: '8px'}} />
+                        <Bar dataKey="count" fill="#3B82F6" radius={[4, 4, 0, 0]} barSize={30} />
+                    </BarChart>
+                </ResponsiveContainer>
+            </div>
+            <div className="flex justify-center text-xs text-slate-500 mt-2 font-bold">
+               Active Conversations
+            </div>
+        </div>
+
+        {/* Chart 3: Fundraising Goal */}
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+             <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
+                <AreaIcon className="w-4 h-4 text-green-500" /> Funds Raised Trend
+            </h3>
+            <div className="h-32 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={fundsData}>
+                        <defs>
+                            <linearGradient id="colorFunds" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
+                                <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                            </linearGradient>
+                        </defs>
+                        <Tooltip contentStyle={{fontSize: '12px', borderRadius: '8px'}} formatter={(val: number) => `$${val.toLocaleString()}`} />
+                        <Area type="monotone" dataKey="amount" stroke="#10B981" fillOpacity={1} fill="url(#colorFunds)" strokeWidth={3} />
+                    </AreaChart>
+                </ResponsiveContainer>
+            </div>
+            <div className="flex justify-between text-xs text-slate-500 mt-2 font-bold">
+                <span>Current: ${totalRaised.toLocaleString()}</span>
+                <span className="text-green-600">Goal: ${goal.toLocaleString()}</span>
+            </div>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <div className="flex bg-slate-200 p-1 rounded-lg mt-4 w-fit">
           <button 
             onClick={() => setActiveTab('crm')}
             className={`px-4 py-2 text-sm font-medium rounded-md transition flex items-center gap-2 ${activeTab === 'crm' ? 'bg-white text-electric-600 shadow' : 'text-slate-600 hover:text-slate-900'}`}
@@ -147,72 +258,11 @@ export const Investors: React.FC = () => {
           >
             <Mail className="w-4 h-4" /> Communication Portal
           </button>
-        </div>
       </div>
-
-      {/* SUCCESS TOAST */}
-      {showSuccess && (
-        <div className="absolute top-0 left-0 right-0 mx-auto w-full max-w-md bg-green-600 text-white p-4 rounded-xl shadow-2xl z-50 animate-bounce flex items-center gap-3 justify-center">
-          <CheckCircle2 className="w-6 h-6" />
-          <div className="font-bold">Update Sent Successfully!</div>
-        </div>
-      )}
 
       {/* CRM TAB */}
       {activeTab === 'crm' && (
         <div className="space-y-6">
-          {/* Cap Table Summary */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-slate-900 text-white p-6 rounded-xl shadow-lg">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <div className="text-slate-400 text-xs uppercase font-bold">Total Raised</div>
-                  <div className="text-3xl font-bold mt-1">${totalRaised.toLocaleString()}</div>
-                </div>
-                <div className="p-2 bg-white/10 rounded-lg">
-                  <DollarSign className="w-6 h-6 text-green-400" />
-                </div>
-              </div>
-              <div className="w-full bg-slate-700 h-2 rounded-full mb-2">
-                <div className="bg-green-500 h-2 rounded-full" style={{ width: `${progress}%` }}></div>
-              </div>
-              <div className="flex justify-between text-xs text-slate-400">
-                <span>{progress.toFixed(0)}% of Goal</span>
-                <span>Target: ${goal.toLocaleString()}</span>
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <div className="text-slate-500 text-xs uppercase font-bold">Active Investors</div>
-                  <div className="text-3xl font-bold text-slate-800 mt-1">{investors.length}</div>
-                </div>
-                <div className="p-2 bg-electric-100 rounded-lg">
-                  <Users className="w-6 h-6 text-electric-600" />
-                </div>
-              </div>
-              <div className="text-sm text-slate-600">
-                <span className="text-green-600 font-bold">2</span> Committed • <span className="text-slate-400">1</span> Prospect
-              </div>
-            </div>
-
-             <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <div className="text-slate-500 text-xs uppercase font-bold">Avg. Check Size</div>
-                  <div className="text-3xl font-bold text-slate-800 mt-1">$9,666</div>
-                </div>
-                <div className="p-2 bg-solar-100 rounded-lg">
-                  <TrendingUp className="w-6 h-6 text-solar-600" />
-                </div>
-              </div>
-              <div className="text-sm text-slate-600">
-                Mixed Capital: Loan / Equity / Grant
-              </div>
-            </div>
-          </div>
-
           {/* Investor Table */}
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="p-6 border-b border-slate-100 flex justify-between items-center">

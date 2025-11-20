@@ -1,9 +1,10 @@
+
 import React, { useState, useRef } from 'react';
-import { DollarSign, Landmark, ExternalLink, TrendingUp, Plus, Trash2, PieChart, Wallet, BrainCircuit, PhoneCall, ArrowRight, AlertTriangle, CheckCircle2, Loader2, FileText, Upload, Calculator, ChevronRight, X } from 'lucide-react';
+import { DollarSign, Landmark, ExternalLink, TrendingUp, Plus, Trash2, Wallet, BrainCircuit, PhoneCall, ArrowRight, AlertTriangle, CheckCircle2, Loader2, FileText, Upload, Calculator, ChevronRight, X, BarChart3, PieChart as PieIcon, AreaChart as AreaIcon } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { Expense, GrantOpportunity } from '../types';
 import { analyzeFinancialHealth, negotiateBill, analyzeBankStatement } from '../services/geminiService';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, AreaChart, Area, PieChart, Pie } from 'recharts';
 
 export const Financials: React.FC = () => {
   const { data, updateData } = useData();
@@ -57,6 +58,28 @@ export const Financials: React.FC = () => {
       deadline: '2025-12-01',
       requirements: ['FAFSA Completion', 'Financial Need']
     }
+  ];
+
+  // --- CHART DATA ---
+  // 1. Expense Breakdown (Pie)
+  const expenseData = [
+    { name: 'Essential', value: expenses.filter(e => e.isEssential).reduce((a, b) => a + b.amount, 0), color: '#10B981' },
+    { name: 'Discretionary', value: expenses.filter(e => !e.isEssential).reduce((a, b) => a + b.amount, 0), color: '#F43F5E' }
+  ];
+
+  // 2. Runway (Area) - Simulated based on burn
+  const runwayData = [
+    { month: 'Now', balance: cashOnHand },
+    { month: '+1 Mo', balance: cashOnHand - totalMonthlyExpenses },
+    { month: '+2 Mo', balance: cashOnHand - (totalMonthlyExpenses * 2) },
+    { month: '+3 Mo', balance: cashOnHand - (totalMonthlyExpenses * 3) },
+  ];
+
+  // 3. Burn History (Bar) - Simulated
+  const burnHistory = [
+    { month: 'Sep', amount: 1800 },
+    { month: 'Oct', amount: 2100 },
+    { month: 'Nov', amount: totalMonthlyExpenses },
   ];
 
   const handleAddExpense = () => {
@@ -147,12 +170,6 @@ export const Financials: React.FC = () => {
         reader.readAsDataURL(file);
     }
   };
-
-  // Data for Chart
-  const chartData = [
-    { name: 'Needs', value: expenses.filter(e => e.isEssential).reduce((a, b) => a + b.amount, 0) },
-    { name: 'Wants', value: expenses.filter(e => !e.isEssential).reduce((a, b) => a + b.amount, 0) },
-  ];
 
   return (
     <div className="space-y-6 relative">
@@ -330,22 +347,83 @@ export const Financials: React.FC = () => {
       )}
 
       {/* Header */}
-      <div className="bg-gradient-to-r from-green-900 to-emerald-800 p-8 rounded-2xl shadow-lg text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
-        <div className="relative z-10 flex flex-col md:flex-row justify-between md:items-center gap-6">
-            <div>
-                <h2 className="text-3xl font-bold">Financial Command Center</h2>
-                <p className="text-emerald-100">Optimize runway, cut burn rate, and manage capital.</p>
+      <div className="flex flex-col md:flex-row justify-between md:items-center gap-6 mb-2">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-800">Financial Command Center</h2>
+            <p className="text-slate-500">Optimize runway, cut burn rate, and manage capital.</p>
+          </div>
+      </div>
+
+      {/* --- MINI DASHBOARD --- */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        {/* Chart 1: Expense Composition */}
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+             <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
+                <PieIcon className="w-4 h-4 text-emerald-500" /> Needs vs. Wants
+            </h3>
+            <div className="h-32 w-full flex gap-4 items-center">
+                <div className="flex-1 h-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie data={expenseData} innerRadius={25} outerRadius={40} paddingAngle={5} dataKey="value">
+                                {expenseData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </div>
+                <div className="flex-1 space-y-1">
+                    {expenseData.map(d => (
+                        <div key={d.name} className="flex items-center gap-2 text-xs font-bold text-slate-600">
+                            <div className="w-2 h-2 rounded-full" style={{backgroundColor: d.color}}></div>
+                            {d.name}
+                        </div>
+                    ))}
+                </div>
             </div>
-            <div className="flex gap-3">
-                <div className="text-right px-4 py-2 bg-white/10 rounded-lg backdrop-blur-sm">
-                    <div className="text-xs text-emerald-200 uppercase font-bold">Cash Runway</div>
-                    <div className="text-2xl font-bold">{runwayMonths} Months</div>
-                </div>
-                <div className="text-right px-4 py-2 bg-white/10 rounded-lg backdrop-blur-sm">
-                    <div className="text-xs text-emerald-200 uppercase font-bold">Monthly Burn</div>
-                    <div className="text-2xl font-bold text-red-300">${totalMonthlyExpenses.toLocaleString()}</div>
-                </div>
+        </div>
+
+        {/* Chart 2: Runway */}
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+             <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
+                <AreaIcon className="w-4 h-4 text-red-500" /> Runway Projection
+            </h3>
+            <div className="h-32 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={runwayData}>
+                         <defs>
+                            <linearGradient id="colorRunway" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#F43F5E" stopOpacity={0.3}/>
+                                <stop offset="95%" stopColor="#F43F5E" stopOpacity={0}/>
+                            </linearGradient>
+                        </defs>
+                        <Tooltip contentStyle={{fontSize: '12px', borderRadius: '8px'}} formatter={(val: number) => `$${val.toLocaleString()}`} />
+                        <Area type="monotone" dataKey="balance" stroke="#F43F5E" fillOpacity={1} fill="url(#colorRunway)" strokeWidth={3} />
+                    </AreaChart>
+                </ResponsiveContainer>
+            </div>
+             <div className="flex justify-center text-xs text-slate-500 mt-2 font-bold">
+                <span className="text-red-600">{runwayMonths} Months Left</span>
+            </div>
+        </div>
+
+        {/* Chart 3: Burn History */}
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+             <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
+                <BarChart3 className="w-4 h-4 text-slate-500" /> Burn Rate Trend
+            </h3>
+            <div className="h-32 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={burnHistory}>
+                        <Tooltip cursor={{fill: 'transparent'}} contentStyle={{fontSize: '12px', borderRadius: '8px'}} />
+                        <Bar dataKey="amount" fill="#334155" radius={[4, 4, 0, 0]} barSize={30} />
+                    </BarChart>
+                </ResponsiveContainer>
+            </div>
+             <div className="flex justify-center text-xs text-slate-500 mt-2 font-bold">
+                Current: ${totalMonthlyExpenses.toLocaleString()}/mo
             </div>
         </div>
       </div>
@@ -357,7 +435,7 @@ export const Financials: React.FC = () => {
                 onClick={() => setActiveTab('overview')}
                 className={`px-4 py-2 text-sm font-bold rounded-lg transition flex items-center gap-2 ${activeTab === 'overview' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-500 hover:bg-slate-50'}`}
             >
-                <PieChart className="w-4 h-4" /> Overview
+                <PieIcon className="w-4 h-4" /> Overview
             </button>
             <button 
                 onClick={() => setActiveTab('budget')}
@@ -383,38 +461,7 @@ export const Financials: React.FC = () => {
 
       {/* OVERVIEW TAB */}
       {activeTab === 'overview' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Burn Visualization */}
-            <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-emerald-600" /> Burn Analysis (Needs vs. Wants)
-                </h3>
-                <div className="h-64 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={chartData} layout="vertical">
-                            <XAxis type="number" hide />
-                            <YAxis dataKey="name" type="category" width={60} tick={{fontSize: 12, fontWeight: 'bold'}} />
-                            <Tooltip cursor={{fill: 'transparent'}} />
-                            <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={40}>
-                                {chartData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.name === 'Needs' ? '#10B981' : '#F43F5E'} />
-                                ))}
-                            </Bar>
-                        </BarChart>
-                    </ResponsiveContainer>
-                </div>
-                <div className="flex gap-4 mt-4 text-sm">
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-                        <span>Essential: ${chartData[0].value}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-rose-500"></div>
-                        <span>Discretionary: ${chartData[1].value} (Target for Cuts)</span>
-                    </div>
-                </div>
-            </div>
-
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Capital Stack Summary */}
             <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                 <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
