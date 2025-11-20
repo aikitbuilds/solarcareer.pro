@@ -3,15 +3,17 @@ import { Layout } from './components/Layout';
 import { UserRole } from './types';
 import { INITIAL_CERTIFICATIONS, RECENT_ACTIVITY } from './constants';
 import { DataProvider } from './contexts/DataContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { Login } from './components/Login';
 import { Loader2 } from 'lucide-react';
+import { Toaster } from 'react-hot-toast';
 
-// Lazy Load Pages for Performance Optimization
-// This splits the code into separate chunks, so the user only downloads what they need.
-const Dashboard = lazy(() => import('./components/Dashboard').then(module => ({ default: module.Dashboard })));
-const CertificationTracker = lazy(() => import('./components/CertificationTracker').then(module => ({ default: module.CertificationTracker })));
+// Lazy Load Pages
+const Dashboard = lazy(() => import('./components/Dashboard'));
+const CertificationTracker = lazy(() => import('./components/CertificationTracker'));
 const RealPositions = lazy(() => import('./components/RealPositions').then(module => ({ default: module.RealPositions })));
 const Portfolio = lazy(() => import('./components/Portfolio').then(module => ({ default: module.Portfolio })));
-const AICoach = lazy(() => import('./components/AICoach').then(module => ({ default: module.AICoach })));
+const AICoach = lazy(() => import('./components/AICoach'));
 const Financials = lazy(() => import('./components/Financials').then(module => ({ default: module.Financials })));
 const Investors = lazy(() => import('./components/Investors').then(module => ({ default: module.Investors })));
 const Workbook = lazy(() => import('./components/Workbook').then(module => ({ default: module.Workbook })));
@@ -26,10 +28,15 @@ const PageLoader = () => (
   </div>
 );
 
-const AppContent: React.FC = () => {
+const AuthenticatedApp: React.FC = () => {
+  const { currentUser } = useAuth();
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [userRole, setUserRole] = useState<UserRole>(UserRole.ADMIN);
   const [navAction, setNavAction] = useState<string | null>(null);
+
+  if (!currentUser) {
+    return <Login />;
+  }
 
   const renderPage = () => {
     switch (currentPage) {
@@ -51,50 +58,47 @@ const AppContent: React.FC = () => {
             onClearAction={() => setNavAction(null)}
           />
         );
-      case 'real-positions':
-        return <RealPositions />;
-      case 'portfolio':
-        return <Portfolio />;
+      case 'real-positions': return <RealPositions />;
+      case 'portfolio': return <Portfolio />;
       case 'ai-coach':
         return (
           <div className="h-[calc(100vh-4rem)] md:h-[calc(100vh-6rem)]">
-             <AICoach 
-                onNavigate={setCurrentPage}
-                onAction={setNavAction}
-             />
+             <AICoach onNavigate={setCurrentPage} onAction={setNavAction} />
           </div>
         );
-      case 'workbook':
-        return <Workbook />;
-      case 'financials':
-        return <Financials />;
-      case 'investors':
-        return <Investors />;
-      case 'app-roadmap':
-        return <ProjectRoadmap />;
-      case 'data-management':
-        return <DataManagement />;
-      case 'documentation':
-        return <Documentation />;
-      default:
-        return <div>Page not found</div>;
+      case 'workbook': return <Workbook />;
+      case 'financials': return <Financials />;
+      case 'investors': return <Investors />;
+      case 'app-roadmap': return <ProjectRoadmap />;
+      case 'data-management': return <DataManagement />;
+      case 'documentation': return <Documentation />;
+      default: return <div>Page not found</div>;
     }
   };
 
   return (
-    <Layout activePage={currentPage} onNavigate={setCurrentPage}>
-      <Suspense fallback={<PageLoader />}>
-        {renderPage()}
-      </Suspense>
-    </Layout>
+    <DataProvider>
+      <Layout activePage={currentPage} onNavigate={setCurrentPage}>
+        <Suspense fallback={<PageLoader />}>
+          {renderPage()}
+        </Suspense>
+      </Layout>
+    </DataProvider>
   );
 };
 
 const App: React.FC = () => {
   return (
-    <DataProvider>
-      <AppContent />
-    </DataProvider>
+    <AuthProvider>
+      <Toaster position="top-right" toastOptions={{
+        style: {
+          background: '#334155',
+          color: '#fff',
+          borderRadius: '8px',
+        }
+      }} />
+      <AuthenticatedApp />
+    </AuthProvider>
   );
 };
 

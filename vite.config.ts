@@ -6,5 +6,17 @@ export default defineConfig({
   plugins: [react()],
   define: {
     'process.env': process.env
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-charts': ['recharts'],
+          'vendor-icons': ['lucide-react'],
+          'vendor-ai': ['@google/genai']
+        }
+      }
+    }
   }
 });

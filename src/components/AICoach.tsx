@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { askSolarCoach, analyzeReflection, getTacticalAdvice, getDeepDiveContent, researchCareerTopic } from '../services/geminiService';
 import { Bot, Send, Loader2, Sparkles, ListChecks, MessageSquare, Zap, BrainCircuit, Flame, Sun, Moon, Briefcase, CheckSquare, Timer, ChevronRight, BookOpen, Battery, Disc, UserCheck, ArrowRight, Search, Globe, FileText, BarChart3, Activity, ExternalLink } from 'lucide-react';
@@ -456,3 +455,4 @@ export const AICoach: React.FC<Props> = ({ onNavigate, onAction }) => {
     </div>
   );
 };
+export default AICoach;

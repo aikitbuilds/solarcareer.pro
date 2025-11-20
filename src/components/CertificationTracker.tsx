@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Certification, PhaseStatus, StudySession, StudyResource, FieldLog } from '../types';
 import { INITIAL_SESSIONS, STUDY_RESOURCES } from '../constants';
-import { CheckCircle2, Clock, Calendar, BookOpen, ExternalLink, AlertCircle, PlayCircle, FileText, Trophy, Plus, MapPin, Monitor, Cpu, Sun, Hammer, PencilRuler, LineChart, Wrench, Zap, Network, Loader2, Signal, DownloadCloud, WifiOff, X, BarChart3, PieChart as PieIcon, Activity, BatteryCharging, ClipboardCheck, GraduationCap, CreditCard, ArrowUpRight, ArrowDownRight, ArrowDownLeft, ArrowUpLeft } from 'lucide-react';
+import { CheckCircle2, Clock, Calendar, BookOpen, ExternalLink, AlertCircle, PlayCircle, FileText, Trophy, Plus, MapPin, Monitor, Cpu, Sun, Hammer, PencilRuler, LineChart, Wrench, Zap, Network, Loader2, Signal, DownloadCloud, WifiOff, X, BarChart3, PieChart as PieIcon, Activity } from 'lucide-react';
 import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, RadialBarChart, RadialBar } from 'recharts';
 import { useData } from '../contexts/DataContext';
 
@@ -143,120 +142,99 @@ export const CertificationTracker: React.FC<Props> = ({ certifications: initialC
       </div>
       
       <div className="relative max-w-6xl mx-auto">
-        {/* Connection Lines (Desktop Only) */}
-        <div className="absolute inset-0 hidden lg:block pointer-events-none z-0">
-            {/* Center to Top Left */}
-            <div className="absolute top-[20%] left-[25%] w-[25%] h-[30%] border-b-2 border-l-2 border-slate-200 rounded-bl-3xl"></div>
-            {/* Center to Top Middle */}
-            <div className="absolute top-[20%] left-[50%] h-[30%] border-l-2 border-slate-200"></div>
-            {/* Center to Top Right */}
-            <div className="absolute top-[20%] right-[25%] w-[25%] h-[30%] border-b-2 border-r-2 border-slate-200 rounded-br-3xl"></div>
-            {/* Center to Bottom Left */}
-            <div className="absolute bottom-[20%] left-[25%] w-[25%] h-[30%] border-t-2 border-l-2 border-slate-200 rounded-tl-3xl"></div>
-             {/* Center to Bottom Right */}
-            <div className="absolute bottom-[20%] right-[25%] w-[25%] h-[30%] border-t-2 border-r-2 border-slate-200 rounded-tr-3xl"></div>
-        </div>
-
         {/* Grid Layout for the Map */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
           
           {/* 1. Design Specialist (Top Left) */}
-          <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-red-500 hover:-translate-y-1 transition duration-300 relative group">
-             <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition text-red-200 transform rotate-180"><ArrowDownRight className="w-12 h-12" /></div>
-             <div className="flex items-center gap-3 mb-3 relative z-10">
+          <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-red-500 hover:-translate-y-1 transition duration-300">
+             <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 bg-red-100 rounded-lg"><PencilRuler className="w-6 h-6 text-red-600"/></div>
                 <div>
                     <h4 className="font-bold text-lg leading-none">PV Design</h4>
                     <span className="text-xs text-red-600 font-bold uppercase">Specialist</span>
                 </div>
              </div>
-             <ul className="text-sm text-slate-600 space-y-2 relative z-10">
+             <ul className="text-sm text-slate-600 space-y-2">
                 <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5"></div>PV System Designer</li>
                 <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5"></div>PV Design Engineer</li>
                 <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5"></div>Design Consultant</li>
+                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5"></div>Structural Engineer</li>
              </ul>
           </div>
 
           {/* 2. Installation Pro (Top Middle) */}
-          <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500 hover:-translate-y-1 transition duration-300 relative group">
-             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition text-orange-200"><ArrowDownRight className="w-12 h-12 rotate-45" /></div>
-             <div className="flex items-center gap-3 mb-3 relative z-10">
+          <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-orange-500 hover:-translate-y-1 transition duration-300">
+             <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 bg-orange-100 rounded-lg"><Hammer className="w-6 h-6 text-orange-600"/></div>
                 <div>
                     <h4 className="font-bold text-lg leading-none">PV Installation</h4>
                     <span className="text-xs text-orange-600 font-bold uppercase">Professional (PVIP)</span>
                 </div>
              </div>
-             <ul className="text-sm text-slate-600 space-y-2 relative z-10">
+             <ul className="text-sm text-slate-600 space-y-2">
                 <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-orange-400 mt-1.5"></div>PV Installer / Master Electrician</li>
                 <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-orange-400 mt-1.5"></div>Construction Supervisor</li>
                 <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-orange-400 mt-1.5"></div>Crew Chief</li>
+                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-orange-400 mt-1.5"></div>Site Supervisor</li>
              </ul>
           </div>
 
           {/* 3. Commissioning (Top Right) */}
-          <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-500 hover:-translate-y-1 transition duration-300 relative group">
-             <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition text-blue-200"><ArrowDownLeft className="w-12 h-12" /></div>
-             <div className="flex items-center gap-3 mb-3 relative z-10">
-                <div className="p-2 bg-blue-100 rounded-lg"><ClipboardCheck className="w-6 h-6 text-blue-600"/></div>
+          <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-500 hover:-translate-y-1 transition duration-300">
+             <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 bg-blue-100 rounded-lg"><Wrench className="w-6 h-6 text-blue-600"/></div>
                 <div>
                     <h4 className="font-bold text-lg leading-none">Commissioning</h4>
                     <span className="text-xs text-blue-600 font-bold uppercase">& Maintenance</span>
                 </div>
              </div>
-             <ul className="text-sm text-slate-600 space-y-2 relative z-10">
+             <ul className="text-sm text-slate-600 space-y-2">
                 <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-1.5"></div>PV Service Technician</li>
                 <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-1.5"></div>O&M Manager</li>
+                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-1.5"></div>Site Assessor</li>
                 <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-1.5"></div>Interconnection Engineer</li>
              </ul>
           </div>
 
           {/* CENTER HUB: PV Associate */}
           <div className="lg:col-start-2 flex items-center justify-center py-4 lg:py-0">
-               <div className="bg-white border-4 border-solar-500 p-8 rounded-full shadow-2xl w-64 h-64 flex flex-col items-center justify-center text-center z-20 relative group cursor-pointer hover:scale-105 transition duration-300">
+               <div className="bg-white border-4 border-solar-500 p-8 rounded-full shadow-2xl w-64 h-64 flex flex-col items-center justify-center text-center z-20 relative group cursor-pointer">
                   <div className="absolute inset-0 bg-solar-50 rounded-full opacity-50 animate-pulse group-hover:opacity-80 transition"></div>
                   <div className="absolute -inset-4 border border-dashed border-slate-300 rounded-full animate-spin-slow"></div>
-                  
-                  {/* Connecting Spoke Visuals for Desktop */}
-                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-1 h-8 bg-slate-200 hidden lg:block group-hover:bg-solar-400 transition"></div>
-                  <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-1 h-8 bg-slate-200 hidden lg:block group-hover:bg-solar-400 transition"></div>
-                  <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-slate-200 rounded-tl-3xl -translate-x-full -translate-y-full hidden lg:block"></div>
-                  <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-slate-200 rounded-tr-3xl translate-x-full -translate-y-full hidden lg:block"></div>
-
                   <Trophy className="w-10 h-10 text-solar-600 mb-2 relative z-10" />
                   <h4 className="text-2xl font-bold text-slate-900 relative z-10 leading-tight">PV<br/>Associate</h4>
                   <span className="text-[10px] bg-solar-500 text-white px-3 py-1 rounded-full mt-2 font-bold relative z-10 shadow-md">CURRENT STATUS</span>
+                  <div className="absolute -bottom-12 bg-slate-800 text-white text-xs px-3 py-1 rounded shadow-lg">Prerequisite for All</div>
                </div>
           </div>
 
            {/* 4. Sales (Bottom Left/Middle) */}
-          <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-green-500 hover:-translate-y-1 transition duration-300 lg:col-start-1 lg:row-start-2 relative group">
-             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition text-green-200"><ArrowUpRight className="w-12 h-12" /></div>
-             <div className="flex items-center gap-3 mb-3 relative z-10">
+          <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-green-500 hover:-translate-y-1 transition duration-300 lg:col-start-1 lg:row-start-2">
+             <div className="flex items-center gap-3 mb-3">
                 <div className="p-2 bg-green-100 rounded-lg"><LineChart className="w-6 h-6 text-green-600"/></div>
                 <div>
                     <h4 className="font-bold text-lg leading-none">Technical Sales</h4>
                     <span className="text-xs text-green-600 font-bold uppercase">Certification</span>
                 </div>
              </div>
-             <ul className="text-sm text-slate-600 space-y-2 relative z-10">
+             <ul className="text-sm text-slate-600 space-y-2">
                 <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-1.5"></div>Technical Salesperson</li>
                 <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-1.5"></div>Sales Manager</li>
+                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-1.5"></div>Account Manager</li>
                 <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-1.5"></div>Business Development</li>
              </ul>
           </div>
 
            {/* 5. Storage (Bottom Right/Middle) */}
-          <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-purple-500 hover:-translate-y-1 transition duration-300 lg:col-start-3 lg:row-start-2 relative group">
-             <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition text-purple-200"><ArrowUpLeft className="w-12 h-12" /></div>
-             <div className="flex items-center gap-3 mb-3 relative z-10">
-                <div className="p-2 bg-purple-100 rounded-lg"><BatteryCharging className="w-6 h-6 text-purple-600"/></div>
+          <div className="bg-white p-6 rounded-xl shadow-md border-t-4 border-purple-500 hover:-translate-y-1 transition duration-300 lg:col-start-3 lg:row-start-2">
+             <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 bg-purple-100 rounded-lg"><Zap className="w-6 h-6 text-purple-600"/></div>
                 <div>
                     <h4 className="font-bold text-lg leading-none">Energy Storage</h4>
                     <span className="text-xs text-purple-600 font-bold uppercase">Installation Pro (ESIP)</span>
                 </div>
              </div>
-             <ul className="text-sm text-slate-600 space-y-2 relative z-10">
+             <ul className="text-sm text-slate-600 space-y-2">
                 <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-1.5"></div>Battery Specialist</li>
                 <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-1.5"></div>Storage Integrator</li>
                 <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-1.5"></div>Microgrid Architect</li>
@@ -458,12 +436,12 @@ export const CertificationTracker: React.FC<Props> = ({ certifications: initialC
                   <div className="text-xs text-slate-500">Hours Studied</div>
                 </div>
                 <div className="p-4 bg-slate-50 rounded-lg text-center">
-                  <GraduationCap className="w-5 h-5 mx-auto text-electric-500 mb-2" />
+                  <FileText className="w-5 h-5 mx-auto text-electric-500 mb-2" />
                   <div className="font-bold text-slate-800">4</div>
                   <div className="text-xs text-slate-500">Modules Done</div>
                 </div>
                  <div className="p-4 bg-slate-50 rounded-lg text-center">
-                  <CreditCard className="w-5 h-5 mx-auto text-red-500 mb-2" />
+                  <AlertCircle className="w-5 h-5 mx-auto text-red-500 mb-2" />
                   <div className="font-bold text-slate-800">Pending</div>
                   <div className="text-xs text-slate-500">Payment Status</div>
                 </div>
