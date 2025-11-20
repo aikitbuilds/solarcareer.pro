@@ -1,12 +1,12 @@
 
 import React, { useState } from 'react';
-import { CheckCircle2, Circle, Clock, GitBranch, GitCommit, Bug, Zap, Layout, Server, Shield, Smartphone } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, GitBranch, GitCommit, Bug, Zap, Layout, Server, Shield, Smartphone, Book, MapPin, Wifi, DollarSign } from 'lucide-react';
 
 interface Task {
   id: string;
   title: string;
-  category: 'Frontend' | 'Backend' | 'AI' | 'Design';
-  status: 'Done' | 'In Progress' | 'Todo';
+  category: 'Frontend' | 'Backend' | 'AI' | 'Design' | 'Docs';
+  status: 'Done' | 'In Progress' | 'Upcoming' | 'Todo';
   priority: 'High' | 'Medium' | 'Low';
 }
 
@@ -23,15 +23,21 @@ export const ProjectRoadmap: React.FC = () => {
     { id: '6', title: 'Portfolio Component', category: 'Frontend', status: 'Done', priority: 'Medium' },
     { id: '7', title: 'Financials & Grant Tracking', category: 'Backend', status: 'Done', priority: 'High' },
     { id: '8', title: 'Accountability Mirror (AI)', category: 'AI', status: 'Done', priority: 'High' },
+    { id: '9', title: 'Documentation Center', category: 'Docs', status: 'Done', priority: 'High' },
+    { id: '10', title: 'Framework Export System', category: 'Backend', status: 'Done', priority: 'High' },
+    { id: '11', title: 'Mobile Field Logs (GPS)', category: 'Frontend', status: 'Done', priority: 'High' },
+    { id: '12', title: 'Offline Mode (PWA)', category: 'Frontend', status: 'Done', priority: 'High' },
+    { id: '13', title: 'Rich Text CRM Editor', category: 'Frontend', status: 'Done', priority: 'Medium' },
+    { id: '14', title: 'Dynamic Portfolio Screenshots', category: 'Backend', status: 'Done', priority: 'Medium' },
     
     // In Progress
-    { id: '9', title: 'Mobile Responsive Polish', category: 'Design', status: 'In Progress', priority: 'High' },
-    { id: '10', title: 'Firebase Deployment Setup', category: 'Backend', status: 'In Progress', priority: 'High' },
+    { id: '15', title: 'Beta Testing Phase 1 (Admin)', category: 'Docs', status: 'In Progress', priority: 'High' },
     
-    // Todo
-    { id: '11', title: 'Stripe Payment Integration', category: 'Backend', status: 'Todo', priority: 'Low' },
-    { id: '12', title: 'Offline Mode (PWA)', category: 'Frontend', status: 'Todo', priority: 'Medium' },
-    { id: '13', title: 'User Auth (Google/Email)', category: 'Backend', status: 'Todo', priority: 'High' }
+    // Upcoming / Beta
+    { id: '16', title: 'Stripe Payment Integration', category: 'Backend', status: 'Todo', priority: 'Low' },
+    { id: '17', title: 'User Auth (Google/Email)', category: 'Backend', status: 'Todo', priority: 'High' },
+    { id: '18', title: 'Multi-User Sync (Firebase)', category: 'Backend', status: 'Upcoming', priority: 'High' },
+    { id: '19', title: 'Automated Weekly Reports', category: 'AI', status: 'Upcoming', priority: 'Medium' }
   ];
 
   const stats = {
@@ -40,7 +46,7 @@ export const ProjectRoadmap: React.FC = () => {
     progress: Math.round((tasks.filter(t => t.status === 'Done').length / tasks.length) * 100)
   };
 
-  const renderStatusColumn = (status: 'Done' | 'In Progress' | 'Todo', icon: any, color: string) => {
+  const renderStatusColumn = (status: 'Done' | 'In Progress' | 'Upcoming' | 'Todo', icon: any, color: string) => {
     const items = tasks.filter(t => t.status === status);
     const Icon = icon;
 
@@ -60,6 +66,7 @@ export const ProjectRoadmap: React.FC = () => {
                   task.category === 'AI' ? 'bg-purple-100 text-purple-700' :
                   task.category === 'Backend' ? 'bg-slate-800 text-white' :
                   task.category === 'Frontend' ? 'bg-blue-100 text-blue-700' :
+                  task.category === 'Docs' ? 'bg-yellow-100 text-yellow-700' :
                   'bg-orange-100 text-orange-700'
                 }`}>
                   {task.category}
@@ -92,15 +99,15 @@ export const ProjectRoadmap: React.FC = () => {
           <div>
             <div className="flex items-center gap-3 mb-2">
               <span className="px-3 py-1 bg-white/10 text-white text-xs font-bold rounded-full uppercase tracking-wider border border-white/20 flex items-center gap-2">
-                <GitBranch className="w-3 h-3" /> v1.2.0-beta
+                <GitBranch className="w-3 h-3" /> v1.4.0 (Feature Complete)
               </span>
               <span className="text-green-400 text-xs font-bold flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" /> Build Passing
+                <CheckCircle2 className="w-3 h-3" /> Ready for Beta
               </span>
             </div>
             <h1 className="text-3xl font-bold mb-2">App Development Roadmap</h1>
             <p className="text-slate-300 max-w-2xl">
-              Tracking the construction of the SolarCareer Platform itself.
+              Tracking the construction of the SolarCareer Platform. All core modules are deployed.
             </p>
           </div>
           
@@ -140,9 +147,9 @@ export const ProjectRoadmap: React.FC = () => {
       {/* Main Content */}
       {activeTab === 'board' && (
         <div className="flex flex-col lg:flex-row gap-6 overflow-x-auto pb-6">
-          {renderStatusColumn('Todo', Circle, 'slate')}
-          {renderStatusColumn('In Progress', Zap, 'blue')}
           {renderStatusColumn('Done', CheckCircle2, 'green')}
+          {renderStatusColumn('In Progress', Zap, 'blue')}
+          {renderStatusColumn('Upcoming', Clock, 'slate')}
         </div>
       )}
 
@@ -150,15 +157,51 @@ export const ProjectRoadmap: React.FC = () => {
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8 max-w-4xl">
           <div className="relative border-l-2 border-slate-100 pl-8 space-y-12">
             
-            {/* Entry 1 */}
-            <div className="relative">
+             {/* Entry 1 */}
+             <div className="relative">
               <div className="absolute -left-[39px] top-0 w-6 h-6 bg-green-500 rounded-full border-4 border-white shadow-sm flex items-center justify-center">
-                <CheckCircle2 className="w-3 h-3 text-white" />
+                <Smartphone className="w-3 h-3 text-white" />
+              </div>
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <h3 className="text-lg font-bold text-slate-800">v1.4.0 - Mobile & Field Ops</h3>
+                  <span className="text-xs text-slate-400">Today</span>
+                </div>
+                <ul className="space-y-2 text-sm text-slate-600 list-disc list-inside">
+                  <li>Added <strong>GPS Field Logger</strong> for verifying install hours.</li>
+                  <li>Enabled <strong>Offline PWA Mode</strong> with Service Worker caching.</li>
+                  <li>Updated Portfolio with dynamic screenshots.</li>
+                </ul>
+              </div>
+            </div>
+
+             {/* Entry 2 */}
+             <div className="relative">
+              <div className="absolute -left-[39px] top-0 w-6 h-6 bg-blue-500 rounded-full border-4 border-white shadow-sm flex items-center justify-center">
+                <Book className="w-3 h-3 text-white" />
+              </div>
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <h3 className="text-lg font-bold text-slate-800">v1.3.0 - Docs & Backup</h3>
+                  <span className="text-xs text-slate-400">Yesterday</span>
+                </div>
+                <ul className="space-y-2 text-sm text-slate-600 list-disc list-inside">
+                  <li>Launched <strong>Documentation Center</strong> with User Guides.</li>
+                  <li>Added <strong>Framework Export</strong> to allow cloning the app structure.</li>
+                  <li>Implemented Data Export/Import (JSON).</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Entry 3 */}
+            <div className="relative">
+              <div className="absolute -left-[39px] top-0 w-6 h-6 bg-slate-500 rounded-full border-4 border-white shadow-sm flex items-center justify-center">
+                <DollarSign className="w-3 h-3 text-white" />
               </div>
               <div>
                 <div className="flex items-center gap-3 mb-2">
                   <h3 className="text-lg font-bold text-slate-800">v1.2.0 - Financials & Investors</h3>
-                  <span className="text-xs text-slate-400">Today</span>
+                  <span className="text-xs text-slate-400">2 days ago</span>
                 </div>
                 <ul className="space-y-2 text-sm text-slate-600 list-disc list-inside">
                   <li>Added <strong>Investor CRM</strong> with Cap Table tracking.</li>
@@ -168,85 +211,9 @@ export const ProjectRoadmap: React.FC = () => {
               </div>
             </div>
 
-             {/* Entry 2 */}
-             <div className="relative">
-              <div className="absolute -left-[39px] top-0 w-6 h-6 bg-blue-500 rounded-full border-4 border-white shadow-sm flex items-center justify-center">
-                <Zap className="w-3 h-3 text-white" />
-              </div>
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <h3 className="text-lg font-bold text-slate-800">v1.1.0 - AI Coach & Reflection</h3>
-                  <span className="text-xs text-slate-400">Yesterday</span>
-                </div>
-                <ul className="space-y-2 text-sm text-slate-600 list-disc list-inside">
-                  <li>Launched <strong>SolarAI Coach</strong> with Gemini 2.5 Flash.</li>
-                  <li>Added <strong>Accountability Mirror</strong> for daily reflection.</li>
-                  <li>Integrated Career Audit diagnostics.</li>
-                </ul>
-              </div>
-            </div>
-
-             {/* Entry 3 */}
-             <div className="relative">
-              <div className="absolute -left-[39px] top-0 w-6 h-6 bg-slate-800 rounded-full border-4 border-white shadow-sm flex items-center justify-center">
-                <Server className="w-3 h-3 text-white" />
-              </div>
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <h3 className="text-lg font-bold text-slate-800">v1.0.0 - Core Platform</h3>
-                  <span className="text-xs text-slate-400">Oct 25, 2025</span>
-                </div>
-                <ul className="space-y-2 text-sm text-slate-600 list-disc list-inside">
-                  <li>Initial release of Certification Tracker.</li>
-                  <li>Portfolio component with 3 major projects.</li>
-                  <li>Real Positions market data integration.</li>
-                </ul>
-              </div>
-            </div>
-
           </div>
         </div>
       )}
-
-      {/* Tech Stack Footer */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-        <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-                <Layout className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-                <div className="font-bold text-slate-800">React 18</div>
-                <div className="text-xs text-slate-500">Frontend Core</div>
-            </div>
-        </div>
-         <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 flex items-center gap-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-                <Zap className="w-5 h-5 text-purple-600" />
-            </div>
-            <div>
-                <div className="font-bold text-slate-800">Gemini 2.5</div>
-                <div className="text-xs text-slate-500">AI Engine</div>
-            </div>
-        </div>
-         <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 flex items-center gap-3">
-            <div className="p-2 bg-orange-100 rounded-lg">
-                <Server className="w-5 h-5 text-orange-600" />
-            </div>
-            <div>
-                <div className="font-bold text-slate-800">Firebase</div>
-                <div className="text-xs text-slate-500">Hosting/Auth</div>
-            </div>
-        </div>
-         <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 flex items-center gap-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-                <Shield className="w-5 h-5 text-green-600" />
-            </div>
-            <div>
-                <div className="font-bold text-slate-800">Tailwind</div>
-                <div className="text-xs text-slate-500">Styling System</div>
-            </div>
-        </div>
-      </div>
     </div>
   );
 };

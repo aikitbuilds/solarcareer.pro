@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { ExternalLink, Server, Cpu, BarChart3, Layout, Users, CheckCircle2, ArrowRight, Globe, Layers, Zap, Database, ChevronLeft, ChevronRight, RotateCw } from 'lucide-react';
+import React, { useState } from 'react';
+import { ExternalLink, Server, Cpu, BarChart3, Layout, Users, CheckCircle2, ArrowRight, Globe, Layers, Zap, Database, ChevronLeft, ChevronRight, RotateCw, ImageIcon } from 'lucide-react';
 
 interface Project {
   id: string;
@@ -14,7 +14,8 @@ interface Project {
   techStack: string[];
   impact: string[];
   color: string;
-  imageUrl: string;
+  fallbackImage: string;
+  screenshotUrl?: string; // New optional field to force a specific image
 }
 
 export const Portfolio: React.FC = () => {
@@ -34,8 +35,7 @@ export const Portfolio: React.FC = () => {
         'Eliminated pricing errors via auto-calc'
       ],
       color: 'from-orange-500 to-red-600',
-      // Using a dashboard-style placeholder.
-      imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2670&auto=format&fit=crop' 
+      fallbackImage: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2670&auto=format&fit=crop' 
     },
     {
       id: 'traylor',
@@ -52,8 +52,7 @@ export const Portfolio: React.FC = () => {
         'Integrated real-time market data feeds'
       ],
       color: 'from-indigo-500 to-purple-600',
-      // Replaced broken temporary link with a permanent reliable image representing CRE/Architecture
-      imageUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2670&auto=format&fit=crop'
+      fallbackImage: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2670&auto=format&fit=crop'
     },
     {
       id: 'freedom',
@@ -71,8 +70,7 @@ export const Portfolio: React.FC = () => {
         'Automated personal brand deployment'
       ],
       color: 'from-blue-600 to-cyan-500',
-       // Success/Growth image matching the "Transform Your Sales" theme
-      imageUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=2664&auto=format&fit=crop'
+      fallbackImage: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=2664&auto=format&fit=crop'
     },
     {
       id: 'sunpeach',
@@ -89,10 +87,45 @@ export const Portfolio: React.FC = () => {
         'Zero downtime during migration'
       ],
       color: 'from-yellow-500 to-orange-500',
-       // Using a CRM/Interface style placeholder.
-      imageUrl: 'https://images.unsplash.com/photo-1661956602116-aa6865609028?q=80&w=2564&auto=format&fit=crop'
+      // Internal tool might be behind login, so we force a high-quality dashboard screenshot here
+      screenshotUrl: 'https://images.unsplash.com/photo-1556155092-490a1ba16284?q=80&w=2670&auto=format&fit=crop',
+      fallbackImage: 'https://images.unsplash.com/photo-1661956602116-aa6865609028?q=80&w=2564&auto=format&fit=crop'
     }
   ];
+
+  // Helper component to handle image loading errors
+  const ProjectImage = ({ project }: { project: Project }) => {
+    // Use manual screenshot URL if provided, otherwise attempt dynamic generation
+    const initialSrc = project.screenshotUrl 
+      ? project.screenshotUrl 
+      : `https://image.thum.io/get/width/1200/crop/750/noanimate/${project.url}`;
+      
+    const [imgSrc, setImgSrc] = useState(initialSrc);
+    const [hasError, setHasError] = useState(false);
+
+    const handleError = () => {
+      if (!hasError) {
+        setImgSrc(project.fallbackImage);
+        setHasError(true);
+      }
+    };
+
+    return (
+      <div className="relative w-full h-full">
+        <img 
+          src={imgSrc} 
+          alt={`${project.name} Screenshot`} 
+          className="w-full h-full object-cover object-top opacity-90 group-hover:opacity-40 group-hover:scale-105 transition duration-700 ease-out"
+          onError={handleError}
+        />
+        {hasError && (
+           <div className="absolute bottom-2 right-2 bg-slate-800/80 text-white text-[10px] px-2 py-1 rounded">
+             Placeholder
+           </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-12">
@@ -166,11 +199,7 @@ export const Portfolio: React.FC = () => {
 
                 {/* Image Container */}
                 <div className="relative aspect-[16/10] overflow-hidden bg-slate-900 group">
-                   <img 
-                    src={project.imageUrl} 
-                    alt={`${project.name} Screenshot`}
-                    className="w-full h-full object-cover opacity-90 group-hover:opacity-40 group-hover:scale-105 transition duration-700 ease-out"
-                   />
+                   <ProjectImage project={project} />
                    
                    {/* Hover Overlay */}
                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 z-10">

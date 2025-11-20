@@ -9,12 +9,16 @@ import { AICoach } from './components/AICoach';
 import { Financials } from './components/Financials';
 import { Investors } from './components/Investors';
 import { ProjectRoadmap } from './components/ProjectRoadmap';
+import { DataManagement } from './components/DataManagement';
+import { Documentation } from './components/Documentation';
 import { UserRole } from './types';
 import { INITIAL_CERTIFICATIONS, RECENT_ACTIVITY } from './constants';
+import { DataProvider } from './contexts/DataContext';
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [userRole, setUserRole] = useState<UserRole>(UserRole.ADMIN);
+  const [navAction, setNavAction] = useState<string | null>(null);
 
   const renderPage = () => {
     switch (currentPage) {
@@ -29,7 +33,13 @@ const App: React.FC = () => {
           />
         );
       case 'certifications':
-        return <CertificationTracker certifications={INITIAL_CERTIFICATIONS} />;
+        return (
+          <CertificationTracker 
+            certifications={INITIAL_CERTIFICATIONS} 
+            initialAction={navAction}
+            onClearAction={() => setNavAction(null)}
+          />
+        );
       case 'real-positions':
         return <RealPositions />;
       case 'portfolio':
@@ -37,7 +47,10 @@ const App: React.FC = () => {
       case 'ai-coach':
         return (
           <div className="h-[calc(100vh-4rem)] md:h-[calc(100vh-6rem)]">
-             <AICoach />
+             <AICoach 
+                onNavigate={setCurrentPage}
+                onAction={setNavAction}
+             />
           </div>
         );
       case 'financials':
@@ -46,6 +59,10 @@ const App: React.FC = () => {
         return <Investors />;
       case 'app-roadmap':
         return <ProjectRoadmap />;
+      case 'data-management':
+        return <DataManagement />;
+      case 'documentation':
+        return <Documentation />;
       default:
         return <div>Page not found</div>;
     }
@@ -55,6 +72,14 @@ const App: React.FC = () => {
     <Layout activePage={currentPage} onNavigate={setCurrentPage}>
       {renderPage()}
     </Layout>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <DataProvider>
+      <AppContent />
+    </DataProvider>
   );
 };
 

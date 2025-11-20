@@ -1,0 +1,23 @@
+
+{
+  "name": "SolarCareer Transformation Manager",
+  "short_name": "SolarCareer",
+  "description": "Mission control for solar career transformation.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3B82F6",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192x192.png?text=SC",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512.png?text=SC",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

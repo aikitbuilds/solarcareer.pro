@@ -3,8 +3,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Investor, InvestorUpdate } from '../types';
 import { Users, Send, Plus, DollarSign, PieChart, TrendingUp, Mail, CheckCircle2, Sparkles, Loader2, Save, X, Calendar, Filter, Eye, Bold, Italic, Underline, List, AlignLeft } from 'lucide-react';
 import { draftInvestorUpdate } from '../services/geminiService';
+import { useData } from '../contexts/DataContext';
 
 export const Investors: React.FC = () => {
+  const { data, updateData } = useData();
   const [activeTab, setActiveTab] = useState<'crm' | 'communicate'>('crm');
   
   // State for Adding Investor
@@ -17,16 +19,9 @@ export const Investors: React.FC = () => {
     lastContact: new Date().toISOString().split('T')[0]
   });
 
-  // Mock Data
-  const [investors, setInvestors] = useState<Investor[]>([
-    { id: '1', name: 'Family Trust A', type: 'Loan', status: 'Wired', amount: 15000, email: 'family@trust.com', lastContact: '2025-10-20', notes: 'Repayment via salary garnish starts Jan 2026.' },
-    { id: '2', name: 'Angel Investor B', type: 'Equity', status: 'Committed', amount: 10000, email: 'angel@vc.com', lastContact: '2025-10-22', notes: 'Waiting on Phase 1 completion proof.' },
-    { id: '3', name: 'WIOA Grant', type: 'Grant', status: 'Prospect', amount: 4000, email: 'case.manager@texas.gov', lastContact: '2025-10-25', notes: 'Application pending review.' },
-  ]);
-
-  const [updates, setUpdates] = useState<InvestorUpdate[]>([
-    { id: 'u1', date: 'Oct 01, 2025', subject: 'Project Launch & Initial Funding', preview: 'Phase 1 has officially begun. We have secured 50% of the required capital...', sentTo: 2 }
-  ]);
+  // Use Global Data
+  const investors = data.investors;
+  const updates = data.investorUpdates;
 
   // Communication State
   const [emailSubject, setEmailSubject] = useState('');
@@ -72,7 +67,7 @@ export const Investors: React.FC = () => {
       notes: 'New entry'
     };
 
-    setInvestors([...investors, investor]);
+    updateData({ investors: [...investors, investor] });
     setShowAddInvestor(false);
     setNewInvestor({ name: '', type: 'Equity', amount: 0, status: 'Prospect', lastContact: new Date().toISOString().split('T')[0] });
   };
@@ -113,7 +108,7 @@ export const Investors: React.FC = () => {
       preview: plainText.substring(0, 100) + '...',
       sentTo: recipientCount
     };
-    setUpdates([newUpdate, ...updates]);
+    updateData({ investorUpdates: [newUpdate, ...updates] });
     
     setTimeout(() => {
       setShowSuccess(false);

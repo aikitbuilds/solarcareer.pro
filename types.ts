@@ -47,13 +47,23 @@ export interface StudyResource {
   url: string;
   type: 'video' | 'article' | 'exam' | 'simulation' | 'design_tool';
   category: string;
+  offlineAvailable?: boolean; 
 }
 
-// --- NEW TYPES FOR IMPROVEMENTS ---
+// --- FINANCIAL TYPES ---
+
+export interface Expense {
+  id: string;
+  category: 'Housing' | 'Food' | 'Transport' | 'Utilities' | 'Debt' | 'Subscription';
+  name: string;
+  amount: number;
+  frequency: 'Monthly' | 'One-Time';
+  isEssential: boolean;
+}
 
 export interface GrantOpportunity {
   id: string;
-  name: string; // e.g., "WIOA Workforce Grant"
+  name: string;
   amount: number;
   status: 'Not Started' | 'Applied' | 'Approved' | 'Denied';
   deadline: string;
@@ -66,7 +76,12 @@ export interface FieldLog {
   location: string;
   hours: number;
   task: string;
-  verified: boolean; // Simulates GPS/Supervisor verification
+  verified: boolean;
+  coordinates?: {
+    lat: number;
+    lng: number;
+    accuracy: number;
+  };
 }
 
 export interface JournalEntry {
@@ -80,10 +95,16 @@ export interface JournalEntry {
 
 export interface RoutineTask {
   id: string;
-  label: string;
-  category: 'Morning' | 'Training' | 'Evening';
-  completed: boolean;
+  title: string; // Renamed from label
+  description?: string;
+  category: 'Morning' | 'Training' | 'Evening' | 'Financial' | 'Career' | 'General';
+  status: 'Todo' | 'In_Progress' | 'Done'; // Replaces 'completed' boolean
+  priority: 'High' | 'Medium' | 'Low';
+  dueDate?: string;
+  tags?: string[];
+  source?: 'Manual' | 'AI_Coach' | 'CFO' | 'Career_Audit';
   timeEstimate?: string;
+  completed?: boolean; // Deprecated, kept for temporary compat if needed, but we prefer status
 }
 
 // --- INVESTOR CRM TYPES ---
@@ -105,4 +126,55 @@ export interface InvestorUpdate {
   subject: string;
   preview: string;
   sentTo: number;
+}
+
+// --- SYNC & CLOUD TYPES ---
+export interface SyncSettings {
+  externalAppUrl: string;
+  firebaseConfig?: {
+    apiKey: string;
+    authDomain: string;
+    projectId: string;
+    storageBucket: string;
+  };
+  lastSync: string | null;
+  isConnected: boolean;
+}
+
+// --- AI ANALYSIS TYPES ---
+export interface CFOAnalysisData {
+  healthScore: number; // 0-100
+  healthStatus: 'Critical' | 'Stable' | 'Healthy' | 'Robust';
+  runwayMonths: number;
+  burnDownData: { month: string; balance: number }[];
+  savingsTable: { item: string; potentialSave: number; action: string }[];
+  actionPlan: { task: string; priority: 'High'|'Medium'|'Low' }[];
+  summary: string;
+}
+
+export interface CareerAuditData {
+  summary: string;
+  currentTrajectoryScore: number; // 0-100
+  strengths: string[];
+  gaps: string[];
+  actionItems: {
+    title: string;
+    description: string;
+    priority: 'High' | 'Medium' | 'Low';
+    category: string;
+  }[];
+}
+
+// --- GLOBAL DATABASE TYPE ---
+export interface AppData {
+  userRole: UserRole;
+  certifications: Certification[];
+  investors: Investor[];
+  investorUpdates: InvestorUpdate[];
+  routineTasks: RoutineTask[];
+  journal: JournalEntry[];
+  fieldLogs: FieldLog[];
+  expenses: Expense[];
+  syncSettings: SyncSettings;
+  lastSaved: string;
 }

@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 
 const apiKey = process.env.API_KEY || '';
@@ -158,5 +157,111 @@ export const draftInvestorUpdate = async (topic: string, context: string): Promi
   } catch (error) {
     console.error("Gemini API Error:", error);
     return "Drafting System Offline.";
+  }
+};
+
+// --- FINANCIAL AI SERVICES ---
+
+export const analyzeFinancialHealth = async (expenses: any[], income: number): Promise<string> => {
+  if (!ai) return "Error: API Key not found.";
+
+  try {
+    const response: GenerateContentResponse = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `You are a ruthless Startup CFO advising a founder.
+      
+      Monthly Burn Rate: $${expenses.reduce((sum, e) => sum + e.amount, 0)}
+      Current Cash/Income: $${income}
+      Expense List: ${JSON.stringify(expenses)}
+      
+      Task:
+      1. Calculate Runway (Months of survival).
+      2. Identify 2 specific "Fat Cutting" actions to extend runway. Be aggressive.
+      3. Suggest 1 revenue/grant strategy based on Solar Industry trends.
+      
+      Tone: Direct, financial, strategic.`,
+    });
+    return response.text || "Analysis failed.";
+  } catch (error) {
+    console.error("Gemini API Error:", error);
+    return "CFO System Offline.";
+  }
+};
+
+export const negotiateBill = async (provider: string, amount: number, serviceType: string): Promise<string> => {
+  if (!ai) return "Error: API Key not found.";
+
+  try {
+    const response: GenerateContentResponse = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `Write a script for me to call ${provider} and negotiate my ${serviceType} bill (currently $${amount}).
+      
+      Strategies to use:
+      1. Mention competitor offers.
+      2. Ask for "retention offers".
+      3. Be polite but firm about cancelling if rate isn't lowered.
+      
+      Output Format:
+      "Agent: [Likely response]"
+      "You: [Exact script to say]"`,
+    });
+    return response.text || "Script generation failed.";
+  } catch (error) {
+    console.error("Gemini API Error:", error);
+    return "Negotiator Offline.";
+  }
+};
+
+export const analyzeBankStatement = async (base64Data: string, mimeType: string = 'application/pdf'): Promise<{ text: string, suggestedExpenses: any[] }> => {
+  if (!ai) return { text: "Error: API Key not found.", suggestedExpenses: [] };
+
+  try {
+    const response: GenerateContentResponse = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [
+        {
+          inlineData: {
+            mimeType: mimeType,
+            data: base64Data
+          }
+        },
+        {
+          text: `Analyze this bank statement for "Minimal Living Expenses" (MLE).
+          
+          1. Identify recurring monthly commitments (Rent, Insurance, Utilities, Car Note, Subscriptions).
+          2. Ignore one-off purchases (Dining out, shopping) unless they look like a habit.
+          3. Suggest a budget optimization strategy.
+          
+          Also, generate a JSON-like list of extracted expenses at the end of your response in this format:
+          [EXPENSE_START]
+          [
+            { "name": "Example Rent", "amount": 1200, "category": "Housing", "frequency": "Monthly", "isEssential": true },
+            ...
+          ]
+          [EXPENSE_END]`
+        }
+      ]
+    });
+
+    const rawText = response.text || "";
+    
+    // Extract JSON part
+    let suggestedExpenses = [];
+    const jsonMatch = rawText.match(/\[EXPENSE_START\]([\s\S]*?)\[EXPENSE_END\]/);
+    if (jsonMatch && jsonMatch[1]) {
+      try {
+        suggestedExpenses = JSON.parse(jsonMatch[1]);
+      } catch (e) {
+        console.error("Failed to parse expense JSON", e);
+      }
+    }
+
+    // Clean text for display
+    const displayText = rawText.replace(/\[EXPENSE_START\][\s\S]*?\[EXPENSE_END\]/, '').trim();
+
+    return { text: displayText, suggestedExpenses };
+  } catch (error) {
+    console.error("Gemini API Error:", error);
+    return { text: "Failed to analyze document. Please ensure it is a valid PDF or Image.", suggestedExpenses: [] };
   }
 };

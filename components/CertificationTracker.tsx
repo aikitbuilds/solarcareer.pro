@@ -1,22 +1,48 @@
 
-import React, { useState } from 'react';
-import { Certification, PhaseStatus, StudySession, StudyResource } from '../types';
+import React, { useState, useEffect } from 'react';
+import { Certification, PhaseStatus, StudySession, StudyResource, FieldLog } from '../types';
 import { INITIAL_SESSIONS, STUDY_RESOURCES } from '../constants';
-import { CheckCircle2, Clock, Calendar, BookOpen, ExternalLink, AlertCircle, PlayCircle, FileText, Trophy, Plus, MapPin, Monitor, Cpu, Sun, Hammer, PencilRuler, LineChart, Wrench, Zap, Network } from 'lucide-react';
+import { CheckCircle2, Clock, Calendar, BookOpen, ExternalLink, AlertCircle, PlayCircle, FileText, Trophy, Plus, MapPin, Monitor, Cpu, Sun, Hammer, PencilRuler, LineChart, Wrench, Zap, Network, Loader2, Signal, DownloadCloud, WifiOff, X } from 'lucide-react';
 import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useData } from '../contexts/DataContext';
 
 interface Props {
   certifications: Certification[];
+  initialAction?: string | null;
+  onClearAction?: () => void;
 }
 
-export const CertificationTracker: React.FC<Props> = ({ certifications }) => {
+export const CertificationTracker: React.FC<Props> = ({ certifications: initialCerts, initialAction, onClearAction }) => {
+  const { data, updateData } = useData();
   const [activeTab, setActiveTab] = useState<'active' | 'timeline' | 'resources' | 'field' | 'careermap'>('active');
+  
+  // Prioritize data from global context if available to ensure persistence works
+  const certifications = data.certifications && data.certifications.length > 0 ? data.certifications : initialCerts;
+  
   const activeCert = certifications.find(c => c.status === PhaseStatus.IN_PROGRESS);
 
   // Local state to handle adding new scores for the demo
   const [examScores, setExamScores] = useState(activeCert?.practiceExamScores || []);
   const [showAddScore, setShowAddScore] = useState(false);
   const [newScore, setNewScore] = useState('');
+
+  // Study Logging State
+  const [showLogStudy, setShowLogStudy] = useState(false);
+  const [studyDuration, setStudyDuration] = useState('');
+  const [studyNotes, setStudyNotes] = useState('');
+
+  // Field Log State
+  const [isLocating, setIsLocating] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
+
+  // Handle Initial Actions from other pages (e.g. AI Coach)
+  useEffect(() => {
+    if (initialAction === 'log_study') {
+      setActiveTab('active');
+      setShowLogStudy(true);
+      if(onClearAction) onClearAction();
+    }
+  }, [initialAction, onClearAction]);
 
   const handleAddScore = () => {
     if (!newScore) return;
@@ -27,6 +53,67 @@ export const CertificationTracker: React.FC<Props> = ({ certifications }) => {
     setExamScores([...examScores, { date: today, score }]);
     setNewScore('');
     setShowAddScore(false);
+  };
+
+  const handleSaveStudySession = () => {
+    if (!activeCert || !studyDuration) return;
+    const hours = parseFloat(studyDuration);
+    if (isNaN(hours)) return;
+
+    // Update global data
+    const updatedCerts = certifications.map(c => 
+      c.id === activeCert.id 
+        ? { 
+            ...c, 
+            completedHours: Math.min(c.totalHours, c.completedHours + hours),
+            progress: Math.min(100, Math.round(((c.completedHours + hours) / c.totalHours) * 100))
+          } 
+        : c
+    );
+    
+    updateData({ certifications: updatedCerts });
+    setShowLogStudy(false);
+    setStudyDuration('');
+    setStudyNotes('');
+    // Note: In a real app, we would also save the session to a 'StudySessions' array
+  };
+
+  const handleGPSCheckIn = () => {
+    setIsLocating(true);
+    setLocationError(null);
+
+    if (!navigator.geolocation) {
+      setLocationError("Geolocation is not supported by your browser.");
+      setIsLocating(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const newLog: FieldLog = {
+          id: Date.now().toString(),
+          date: new Date().toLocaleDateString(),
+          location: `GPS Verified Coordinates`,
+          hours: 4.0, // Default block
+          task: 'Site Installation & Safety Check',
+          verified: true,
+          coordinates: {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            accuracy: position.coords.accuracy
+          }
+        };
+        
+        updateData({ fieldLogs: [newLog, ...data.fieldLogs] });
+        setIsLocating(false);
+      },
+      (error) => {
+        console.error("GPS Error", error);
+        setLocationError("Unable to retrieve location. Ensure GPS is enabled.");
+        setIsLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
   };
 
   // Career Map Visual Component
@@ -143,7 +230,54 @@ export const CertificationTracker: React.FC<Props> = ({ certifications }) => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      
+      {/* Log Study Time Modal */}
+      {showLogStudy && activeCert && (
+        <div className="fixed inset-0 bg-slate-900/80 z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+             <div className="bg-slate-900 p-6 flex justify-between items-center">
+               <div>
+                 <h3 className="text-white font-bold text-lg flex items-center gap-2">
+                   <BookOpen className="w-5 h-5 text-electric-400" /> Log Study Session
+                 </h3>
+                 <p className="text-slate-400 text-xs">Adding hours to: {activeCert.name}</p>
+               </div>
+               <button onClick={() => setShowLogStudy(false)} className="text-slate-400 hover:text-white"><X className="w-5 h-5" /></button>
+             </div>
+             <div className="p-6 space-y-4">
+               <div>
+                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Duration (Hours)</label>
+                 <input 
+                   type="number" 
+                   value={studyDuration}
+                   onChange={(e) => setStudyDuration(e.target.value)}
+                   className="w-full p-3 border border-slate-200 rounded-lg text-lg font-bold text-slate-800 focus:ring-2 focus:ring-electric-500 outline-none"
+                   placeholder="e.g. 1.5"
+                   autoFocus
+                 />
+               </div>
+               <div>
+                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Session Notes</label>
+                 <textarea 
+                   value={studyNotes}
+                   onChange={(e) => setStudyNotes(e.target.value)}
+                   className="w-full p-3 border border-slate-200 rounded-lg text-sm text-slate-700 focus:ring-2 focus:ring-electric-500 outline-none h-24 resize-none"
+                   placeholder="What did you cover? (e.g. Electrical codes, shading analysis)"
+                 />
+               </div>
+               <button 
+                 onClick={handleSaveStudySession}
+                 disabled={!studyDuration}
+                 className="w-full bg-electric-600 hover:bg-electric-700 disabled:bg-slate-300 text-white py-3 rounded-lg font-bold transition shadow-lg shadow-electric-600/20"
+               >
+                 Confirm & Save Progress
+               </button>
+             </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <div>
@@ -240,7 +374,10 @@ export const CertificationTracker: React.FC<Props> = ({ certifications }) => {
                 <button className="flex-1 bg-electric-600 hover:bg-electric-700 text-white py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2">
                   <PlayCircle className="w-5 h-5" /> Resume Course
                 </button>
-                 <button className="flex-1 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2">
+                 <button 
+                  onClick={() => setShowLogStudy(true)}
+                  className="flex-1 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2"
+                 >
                   <BookOpen className="w-5 h-5" /> Log Study Time
                 </button>
               </div>
@@ -358,26 +495,55 @@ export const CertificationTracker: React.FC<Props> = ({ certifications }) => {
                 
                 <div className="bg-slate-50 border border-slate-200 rounded-lg p-6 text-center mb-6">
                     <p className="text-slate-600 font-medium mb-4">Ready to log hours at job site?</p>
-                    <button className="w-full bg-electric-600 hover:bg-electric-700 text-white font-bold py-4 rounded-xl shadow-lg transition flex flex-col items-center justify-center gap-1">
-                        <span className="flex items-center gap-2 text-lg"><CheckCircle2 className="w-6 h-6" /> CHECK IN</span>
-                        <span className="text-xs opacity-80 font-normal">Verifying GPS Location...</span>
+                    <button 
+                      onClick={handleGPSCheckIn}
+                      disabled={isLocating}
+                      className={`w-full font-bold py-4 rounded-xl shadow-lg transition flex flex-col items-center justify-center gap-1 ${isLocating ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-electric-600 hover:bg-electric-700 text-white'}`}
+                    >
+                        {isLocating ? (
+                          <>
+                            <span className="flex items-center gap-2 text-lg"><Loader2 className="w-6 h-6 animate-spin" /> ACQUIRING GPS...</span>
+                            <span className="text-xs opacity-80 font-normal">Triangulating position...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="flex items-center gap-2 text-lg"><CheckCircle2 className="w-6 h-6" /> GPS CHECK-IN</span>
+                            <span className="text-xs opacity-80 font-normal">Verify location & log timestamp</span>
+                          </>
+                        )}
                     </button>
+                    {locationError && (
+                      <div className="mt-3 text-xs text-red-500 flex items-center justify-center gap-1">
+                        <AlertCircle className="w-3 h-3" /> {locationError}
+                      </div>
+                    )}
                 </div>
 
                 <div className="space-y-3">
-                    <h4 className="font-bold text-slate-700 text-sm uppercase">Recent Logs</h4>
-                    {[
-                        { date: 'Oct 24', loc: 'Residential Install - Katy, TX', hrs: 6.5 },
-                        { date: 'Oct 22', loc: 'Site Survey - Woodlands, TX', hrs: 4.0 },
-                    ].map((log, i) => (
-                        <div key={i} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-100">
-                            <div>
-                                <div className="font-bold text-slate-800">{log.loc}</div>
-                                <div className="text-xs text-slate-500">{log.date}</div>
-                            </div>
-                            <span className="font-mono font-bold text-electric-600">{log.hrs} hrs</span>
-                        </div>
-                    ))}
+                    <h4 className="font-bold text-slate-700 text-sm uppercase flex justify-between">
+                      <span>Recent Verified Logs</span>
+                      <span className="text-electric-600 text-xs flex items-center gap-1"><Signal className="w-3 h-3"/> Live Sync</span>
+                    </h4>
+                    {data.fieldLogs.length === 0 ? (
+                       <div className="text-center py-4 text-slate-400 text-sm italic border border-dashed border-slate-200 rounded-lg">No field logs recorded yet.</div>
+                    ) : (
+                      data.fieldLogs.map((log) => (
+                          <div key={log.id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-100">
+                              <div>
+                                  <div className="font-bold text-slate-800 flex items-center gap-2">
+                                    {log.location}
+                                    {log.coordinates && (
+                                      <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-mono" title={`Lat: ${log.coordinates.lat}, Lng: ${log.coordinates.lng}`}>
+                                        GPS
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="text-xs text-slate-500">{log.date} • {log.task}</div>
+                              </div>
+                              <span className="font-mono font-bold text-electric-600">{log.hours} hrs</span>
+                          </div>
+                      ))
+                    )}
                 </div>
             </div>
 
@@ -385,14 +551,16 @@ export const CertificationTracker: React.FC<Props> = ({ certifications }) => {
                 <div className="w-full max-w-xs">
                     <div className="flex justify-between text-sm mb-1">
                         <span className="font-bold text-slate-700">PVIP Requirement</span>
-                        <span className="text-slate-500">18 / 58 Hours</span>
+                        <span className="text-slate-500">
+                          {data.fieldLogs.reduce((acc, log) => acc + log.hours, 0)} / 58 Hours
+                        </span>
                     </div>
                     <div className="w-full bg-slate-100 h-3 rounded-full mb-6">
-                        <div className="bg-green-500 h-3 rounded-full" style={{ width: '31%' }}></div>
+                        <div className="bg-green-500 h-3 rounded-full" style={{ width: `${(data.fieldLogs.reduce((acc, log) => acc + log.hours, 0) / 58) * 100}%` }}></div>
                     </div>
                 </div>
                 <p className="text-slate-600 text-sm">
-                    You need <strong>40 more hours</strong> of documented installation experience to qualify for the PVIP exam.
+                    You need <strong>{Math.max(0, 58 - data.fieldLogs.reduce((acc, log) => acc + log.hours, 0))} more hours</strong> of documented installation experience to qualify for the PVIP exam.
                 </p>
             </div>
         </div>
@@ -466,19 +634,35 @@ export const CertificationTracker: React.FC<Props> = ({ certifications }) => {
 
             {/* Standard Resources */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                <h3 className="font-bold text-lg mb-4 text-slate-800">Study Library</h3>
+                <h3 className="font-bold text-lg mb-4 text-slate-800 flex items-center justify-between">
+                   <span>Study Library</span>
+                   <span className="text-xs font-normal text-slate-500 flex items-center gap-1">
+                     <DownloadCloud className="w-3 h-3" /> Available Offline
+                   </span>
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {STUDY_RESOURCES.map(resource => (
-                    <a href={resource.url} key={resource.id} target="_blank" rel="noopener noreferrer" className="group block p-4 bg-slate-50 rounded-xl border border-slate-100 hover:border-electric-300 hover:shadow-md transition">
+                    <div key={resource.id} className="group block p-4 bg-slate-50 rounded-xl border border-slate-100 hover:border-electric-300 hover:shadow-md transition relative">
                         <div className="flex items-start justify-between mb-2">
                         <span className={`px-2 py-0.5 text-[10px] uppercase font-bold rounded ${resource.type === 'video' ? 'bg-red-100 text-red-600' : resource.type === 'exam' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'}`}>
                             {resource.type}
                         </span>
-                        <ExternalLink className="w-4 h-4 text-slate-300 group-hover:text-electric-500 transition" />
+                        {['article', 'Code', 'Technical Specs'].includes(resource.category) ? (
+                           <div className="p-1 bg-green-100 rounded-full" title="Cached for Offline Use">
+                              <DownloadCloud className="w-3 h-3 text-green-600" />
+                           </div>
+                        ) : (
+                           <WifiOff className="w-3 h-3 text-slate-300" title="Requires Internet" />
+                        )}
                         </div>
                         <h4 className="font-semibold text-slate-800 mb-1 group-hover:text-electric-600 transition">{resource.title}</h4>
-                        <p className="text-sm text-slate-500">{resource.category}</p>
-                    </a>
+                        <div className="flex justify-between items-end mt-2">
+                          <p className="text-sm text-slate-500">{resource.category}</p>
+                          <a href={resource.url} target="_blank" rel="noopener noreferrer" className="text-electric-600 hover:text-electric-800">
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                        </div>
+                    </div>
                     ))}
                 </div>
             </div>

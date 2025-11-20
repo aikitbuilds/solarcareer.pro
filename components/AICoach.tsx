@@ -1,28 +1,20 @@
 
 import React, { useState, useEffect } from 'react';
 import { askSolarCoach, getCareerAudit, analyzeReflection, getTacticalAdvice, getDeepDiveContent } from '../services/geminiService';
-import { Bot, Send, Loader2, Sparkles, ListChecks, MessageSquare, Zap, BrainCircuit, Flame, Sun, Moon, Briefcase, CheckSquare, Timer, ChevronRight, BookOpen, Battery, Disc, UserCheck } from 'lucide-react';
-import { RoutineTask } from '../types';
+import { Bot, Send, Loader2, Sparkles, ListChecks, MessageSquare, Zap, BrainCircuit, Flame, Sun, Moon, Briefcase, CheckSquare, Timer, ChevronRight, BookOpen, Battery, Disc, UserCheck, ArrowRight } from 'lucide-react';
+import { useData } from '../contexts/DataContext';
 
-export const AICoach: React.FC = () => {
+interface Props {
+  onNavigate?: (page: string) => void;
+  onAction?: (action: string) => void;
+}
+
+export const AICoach: React.FC<Props> = ({ onNavigate, onAction }) => {
+  const { data, updateData } = useData();
   const [activePhase, setActivePhase] = useState<'Morning' | 'Training' | 'Evening'>('Morning');
   
-  // Routine State
-  const [tasks, setTasks] = useState<RoutineTask[]>([
-    // Morning
-    { id: 'm1', label: 'Wake up @ 5:00 AM', category: 'Morning', completed: false, timeEstimate: '05:00' },
-    { id: 'm2', label: 'Hydrate + Electrolytes', category: 'Morning', completed: false },
-    { id: 'm3', label: 'Physical Activation (Zone 2)', category: 'Morning', completed: false, timeEstimate: '30 min' },
-    { id: 'm4', label: 'Review Goals (The Protocol)', category: 'Morning', completed: false },
-    // Training
-    { id: 't1', label: 'Deep Work Block 1 (Study)', category: 'Training', completed: false, timeEstimate: '90 min' },
-    { id: 't2', label: 'Hands-on Sim (SkillCat)', category: 'Training', completed: false, timeEstimate: '30 min' },
-    { id: 't3', label: 'Networking Outreach (3 Contacts)', category: 'Training', completed: false },
-    // Evening
-    { id: 'e1', label: 'Review Daily Metrics', category: 'Evening', completed: false },
-    { id: 'e2', label: 'Plan Tomorrow', category: 'Evening', completed: false },
-    { id: 'e3', label: 'Disconnect Tech', category: 'Evening', completed: false, timeEstimate: '21:00' },
-  ]);
+  // Use Global Data
+  const tasks = data.routineTasks;
 
   const [focusTime, setFocusTime] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
@@ -58,7 +50,8 @@ export const AICoach: React.FC = () => {
   };
 
   const toggleTask = (id: string) => {
-    setTasks(tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+    const updatedTasks = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
+    updateData({ routineTasks: updatedTasks });
   };
 
   const handleSendMessage = async (e?: React.FormEvent) => {
@@ -88,7 +81,20 @@ export const AICoach: React.FC = () => {
   const handleReflection = async () => {
     if (!reflectionText) return;
     setAiLoading(true);
-    const feedback = await analyzeReflection(reflectionText, activePhase === 'Morning' ? 'Morning Plan' : 'Evening Review');
+    const type = activePhase === 'Morning' ? 'Morning Plan' : 'Evening Review';
+    const feedback = await analyzeReflection(reflectionText, type);
+    
+    // Save to DB
+    const newEntry = {
+        id: Date.now().toString(),
+        date: new Date().toISOString(),
+        type: type as any,
+        content: reflectionText,
+        mood: 'Neutral' as any,
+        aiFeedback: feedback
+    };
+    updateData({ journal: [...data.journal, newEntry] });
+
     setChatHistory(prev => [
       ...prev, 
       { sender: 'user', text: `[${activePhase} Reflection Logged]: ${reflectionText}` },
@@ -106,6 +112,15 @@ export const AICoach: React.FC = () => {
     setAiLoading(false);
   };
 
+  const handleQuickAction = (action: string) => {
+    if (onNavigate && onAction) {
+      onAction(action);
+      if (action === 'log_study') {
+        onNavigate('certifications');
+      }
+    }
+  };
+
   return (
     <div className="h-full flex flex-col lg:flex-row gap-6 bg-slate-50 p-1 overflow-hidden">
       
@@ -116,7 +131,7 @@ export const AICoach: React.FC = () => {
         <div className="bg-slate-900 text-white p-4 rounded-xl shadow-lg flex items-center justify-between shrink-0">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center font-bold text-xl shadow-red-500/50 shadow-lg">
-              {savageScore}%
+              {isNaN(savageScore) ? 0 : savageScore}%
             </div>
             <div>
               <div className="text-xs text-slate-400 uppercase tracking-wider font-bold">Savage Score</div>
@@ -152,6 +167,25 @@ export const AICoach: React.FC = () => {
             <Moon className="w-5 h-5" />
             <span className="text-xs font-bold uppercase">Evening</span>
           </button>
+        </div>
+
+        {/* Quick Actions (NEW) */}
+        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm shrink-0">
+           <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Quick Actions</h4>
+           <div className="grid grid-cols-1 gap-2">
+             <button 
+               onClick={() => handleQuickAction('log_study')}
+               className="w-full flex items-center justify-between px-4 py-3 bg-electric-50 hover:bg-electric-100 text-electric-700 rounded-lg transition group border border-electric-100"
+             >
+               <div className="flex items-center gap-3">
+                 <div className="p-1.5 bg-white rounded-md shadow-sm group-hover:shadow">
+                   <BookOpen className="w-4 h-4 text-electric-600" />
+                 </div>
+                 <span className="font-bold text-sm">Log Study Session</span>
+               </div>
+               <ArrowRight className="w-4 h-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition" />
+             </button>
+           </div>
         </div>
 
         {/* Main Routine Content */}
